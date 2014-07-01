@@ -1,4 +1,4 @@
-lm
+Application For Job Shop Scheduling
 ==
 
 调度问题(job shop scheduling) 代码
