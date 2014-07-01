@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import com.lm.domain.Cell;
+import com.lm.domain.Cell;                   //用于产生规则时
 import com.lm.domain.CellSet;
 import com.lm.domain.Job;
 import com.lm.domain.JobSet;
@@ -24,7 +24,7 @@ public class CMSReader {
 	private MachineSet machineSet;
 	private JobSet jobSet;
 	private CellSet cellSet;
-	private Vector<String> machines;
+	private ArrayList<Integer>[] machines;
 	
 	/**
 	 * @Description constructor
@@ -32,25 +32,15 @@ public class CMSReader {
 	 * @exception:
 	 */
 	public CMSReader(String filename) {
-		File file = new File(Constants.CMS_SOURCE + filename);
+		File file = new File(Constants.CMS_SOURCE+filename);
 		BufferedReader reader = null;
 		try {
 			reader 		   			  = new BufferedReader(new FileReader(file));
 			machineSet     			  = new MachineSet();
 			jobSet 		   			  = new JobSet();
 			cellSet 	   			  = new CellSet();
-			Constants.MachineToParts  = new int[machineSet.size()+1][];
-			Constants.CellToNextCells = new int[cellSet.size()+1][];
-			Constants.CellToParts	  = new ArrayList[cellSet.size()+1][cellSet.size()+1];
-			for(int i = 0; i <= cellSet.size()+1; i++){
-				for(int j = 0; j <= cellSet.size()+1; j++){
-					Constants.CellToParts[i][j] = new ArrayList<Integer>();
-				}
-			}
-			machines	   			  = new Vector<String>(machineSet.size()+1);
-			for(int i = 0; i <= machineSet.size(); i++){
-				machines.add("");
-			}
+			
+			
 			
 			// 系统一些主要参数
 			String line;			
@@ -69,6 +59,18 @@ public class CMSReader {
 			 **/
 
 			// 初始化单元信息&&机器对象
+			Constants.MachineToParts  = new int[machNum+1][];
+			Constants.CellToNextCells = new int[cellNum+1][];
+			Constants.CellToParts	  = new ArrayList[cellNum+1][cellNum+1];
+			for(int i = 1; i < cellNum+1; i++){
+				for(int j = 1; j < cellNum+1; j++){
+					Constants.CellToParts[i][j] = new ArrayList<Integer>();
+				}
+			}
+			machines	   			  = new ArrayList[machNum+1];
+			for(int i = 0; i <=machNum; i++){
+				machines[i] = new ArrayList<Integer>();
+			}
 			Constants.CellForm = new HashMap<Integer, Integer>();
 			line = reader.readLine();
 			seq = line.split("\\s++");
@@ -170,9 +172,11 @@ public class CMSReader {
 							continue;
 						}
 						
-						AddToMachineMessage(jobNo,machineSet.get(machineIndex).getId());
-						AddpartsRoutesMessage(jobNo,machineIndex+1,PreCells);
+						AddToMachineMessage(jobNo+1,machineSet.get(machineIndex).getId());
 						CurCells.add(Constants.CellForm.get(machineIndex+1));
+						if(operNo!=0){
+							AddpartsRoutesMessage(jobNo+1,machineIndex+1,PreCells);
+						}
 						
 						procTimeMap.put(machineSet.get(machineIndex),processTime);
 						machineIndex++;
@@ -188,6 +192,7 @@ public class CMSReader {
 					}
 					operations.add(operation);
 					//对所在单元内容进行相关记录
+					PreCells.clear();
 					for(int cur:CurCells){
 						PreCells.add(cur);
 					}
@@ -195,7 +200,6 @@ public class CMSReader {
 					
 				}// End for operations
 				job.setOperations(operations);
-				TransferMachineMessageArray();
 				/** 输出test **/
 				/**
 				 * System.out.println(job.getName()); 
@@ -211,6 +215,7 @@ public class CMSReader {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		TransferMachineMessageArray();
 	}
 
 	/**
@@ -221,9 +226,20 @@ public class CMSReader {
 	 */
 	private void AddpartsRoutesMessage(int jobNo, int machineNo, Vector<Integer> preCells) {
 		int cur = Constants.CellForm.get(machineNo);
+		
 		for(int pre:preCells){
-			Constants.CellToParts[pre][cur].add(jobNo);
- 		}
+			if(cur!=pre){
+				int i=0;
+				for(;i <Constants.CellToParts[pre][cur].size();i++){
+					if(Constants.CellToParts[pre][cur].get(i)==jobNo){ 
+						break;
+					}
+				}
+				if(i == Constants.CellToParts[pre][cur].size()){
+					Constants.CellToParts[pre][cur].add(jobNo);
+				}
+			}
+		}
 	}
 
 	/**
@@ -231,17 +247,18 @@ public class CMSReader {
 	 * @param jobNo
 	 * @param MachineNo
 	 */
-	private void AddToMachineMessage(int jobNo, int MachineNo) {
+
+		private void AddToMachineMessage(int jobNo, int MachineNo) {
 		//transfer the machineid to the index in array
 		int indexNo = MachineNo - 1; 
 		//check if exists
-		for(int i=0; i<machines.get(indexNo).length();i++){
-			if(machines.get(indexNo).charAt(i) == jobNo+'0') return;
+		for(int i=0; i<machines[indexNo].size();i++){
+			if(machines[indexNo].get(i) == jobNo) return;
 		}
 		//if not,add it
-		String cur = machines.get(indexNo);
-		machines.set(indexNo, cur+(jobNo+'0'));
+		machines[indexNo].add(jobNo);
 	}
+
 
 	/**
 	 * @Description 添加单元可转移到的信息
@@ -249,9 +266,14 @@ public class CMSReader {
 	 * @param c
 	 */
 	private void AddToCellMessage(int i,Cell c) {
-		Constants.CellToNextCells[i+1] = new int[c.NextCell.size()];
-		for(int j = 0 ; j < c.NextCell.size(); j++){
-			Constants.CellToNextCells[i+1][j] = c.NextCell.get(j);
+		Constants.CellToNextCells[i+1] = new int[c.NextCell.size()+1];
+		for(int j = 0 ; j < c.NextCell.size()+1; j++){
+			if(j==0){
+				Constants.CellToNextCells[i+1][j] =0;
+			}
+			else{
+				Constants.CellToNextCells[i+1][j] = c.NextCell.get(j-1);
+			}
 		}
 	}
 
@@ -260,13 +282,19 @@ public class CMSReader {
 	 * @Description Transfer the Vector message to Constants.MachineToParts
 	 */
 	public void TransferMachineMessageArray() {
-		//revert Vector array to int[][]
-		for(int MID = 0; MID < machines.size(); MID++){
-			Constants.MachineToParts[MID] = new int[machines.get(MID).length()];
-			for(int curChar = 0; curChar < machines.get(MID).length(); curChar++){
-				Constants.MachineToParts[MID][curChar] = machines.get(MID).charAt(curChar)-'0';
+		for(int MID = 1; MID < machines.length; MID++){
+			Constants.MachineToParts[MID] = new int[machines[MID-1].size()+1];
+			for(int curChar = 0; curChar < machines[MID-1].size()+1; curChar++){
+//				Constants.MachineToParts[MID][curChar] = machines.get(MID-1).charAt(curChar)-'0';
+				if(curChar==0){
+					Constants.MachineToParts[MID][curChar] =0;
+				}
+				else{
+					Constants.MachineToParts[MID][curChar] = machines[MID-1].get(curChar-1);
+				}
 			}
 		}
+	
 	}
 	
 	/**
@@ -327,12 +355,12 @@ public class CMSReader {
 		}// End for job
 	}
 
-	public static void main(String[] args) {
-		CMSReader dataSource = new CMSReader("TransTest.txt");
-		System.out.println("begin//--------------------------------------");
-		// dataSource.printMachineInfo();
-		// dataSource.printJobInfo();
-		System.out.println("success!//--------------------------------------");
-	}
+//	public static void main(String[] args) {
+//		MetaCMSReader dataSource = new MetaCMSReader("TransTest.txt");
+//		System.out.println("begin//--------------------------------------");
+//		// dataSource.printMachineInfo();
+//		// dataSource.printJobInfo();
+//		System.out.println("success!//--------------------------------------");
+//	}
 
 }
