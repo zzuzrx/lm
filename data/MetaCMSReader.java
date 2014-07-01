@@ -24,7 +24,6 @@ import com.lm.Metadomain.JobSet;
 import com.lm.Metadomain.Machine;
 import com.lm.Metadomain.MachineSet;
 import com.lm.Metadomain.Operation;
-
 import com.lm.util.Constants;
 import com.lm.util.ListHelper;
 
