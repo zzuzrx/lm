@@ -1,5 +1,9 @@
 package com.lm.algorithms.abc;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,13 +24,14 @@ import com.lm.util.Constants;
 import com.lm.util.HeapMaxPriorityQueue;
 import com.lm.util.MapUtil;
 import com.lm.util.MaxPriorityQueue;
+
 import java.lang.StringBuffer;
 /*
  * @Description:DABC
  * 
  */
 
-public class DABC {
+public class DABC4 {
 
 
 /*******************************************属性域*******************************************************/
@@ -81,7 +86,7 @@ public class DABC {
 	 * @param scheduler
 	 * @param measurance
 	 */
-	public DABC(MachineSet mSet, JobSet jSet, CellSet cellSet,
+	public DABC4(MachineSet mSet, JobSet jSet, CellSet cellSet,
 			MetaHeuristicScheduler scheduler, MetaIMeasurance measurance) {
 		this(mSet, jSet, cellSet, scheduler, measurance,500, 48);
 	}
@@ -97,7 +102,7 @@ public class DABC {
 	 * DABC
 	 * @exception:
 	 */
-	public DABC(MachineSet mSet, JobSet jSet, CellSet cellSet,
+	public DABC4(MachineSet mSet, JobSet jSet, CellSet cellSet,
 			MetaHeuristicScheduler scheduler, MetaIMeasurance measurance, int Maxcycle,
 			int populationSize) {
 		this.mSet = mSet;
@@ -138,7 +143,8 @@ public class DABC {
 		init_population();
 		updateBestChromosome();                       //保存种群中最好的那个调度解
 		System.out.println("本次循环开始");
-		for (iter=0;iter<MaxCycle;iter++){                               //迭代数
+		for (iter=0;iter<MaxCycle;iter++){        //迭代数
+			System.out.println("第"+iter+"代：");
 			EmployedBees();
 		    OnlookerBees();
 		    updateBestChromosome();
@@ -245,7 +251,7 @@ public class DABC {
 				bestFunction  = evaluation(bestChromosome);
 		}
 //		System.out.println("该种群中最优秀的调度解：");
-//		System.out.println("最优解的函数值:"+bestFunction);
+		System.out.println("最优解的函数值:"+bestFunction);
 		return bestChromosome;
 	}
 	
@@ -325,39 +331,98 @@ public class DABC {
 		int vSetSize = cellSet.size();	              
 		Population = new ArrayList<Chromosome>();
 		Chromosome chromosome = new Chromosome(mSetSize,vSetSize);
+		
 			
 		for(i=0;i<POPULATION_SIZE;i++) {
-			for (int index = 0; index <mSetSize+1; index++) {                      
-                 chromosome.setMachineSegment(index, RandomPriors(Constants.MachineToParts[index]));
-			}
+			if(i<24){
+
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/1/" + (i + 1));  //RulePrioirs初始解读取
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/2/" + (i + 1)); 
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/3/" + (i + 1)); 
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/4/" + (i + 1)); 
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/5/" + (i + 1)); 
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/6/" + (i + 1)); 
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/7/" + (i + 1)); 
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/8/" + (i + 1)); 
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/9/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/10/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/11/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/12/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/13/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/14/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/15/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/16/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/17/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/18/" + (i + 1));
+				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/19/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/20/" + (i + 1));
+				
+				for (int index = 1; index <mSetSize+1; index++) {                      
+					chromosome.setMachineSegment(index, Constants.MachineToParts[index]);
+				}
 			                                                                      
-			for (int SourceIndex = 0; SourceIndex <vSetSize+1; SourceIndex++) {
-				int[] VehicleCellSquence = RandomPriors(Constants.CellToNextCells[SourceIndex]);
-//				if(VehicleCellSquence.length !=0){
-				chromosome.setVehicleSegment(SourceIndex,VehicleCellSquence);
-//				}
-				for (int TargetIndex = 0; TargetIndex <VehicleCellSquence.length; TargetIndex++){
-					int TargetCell = VehicleCellSquence[TargetIndex];
+				for (int SourceIndex = 1; SourceIndex <vSetSize+1; SourceIndex++) {
+					int[] VehicleCellSquence = Constants.CellToNextCells[SourceIndex];
+//					if(VehicleCellSquence.length !=0){
+					chromosome.setVehicleSegment(SourceIndex,VehicleCellSquence);
+//					}
+					for (int TargetIndex = 0; TargetIndex <VehicleCellSquence.length; TargetIndex++){
+						int TargetCell = VehicleCellSquence[TargetIndex];
 
 			                                                   //Arraylist<Integer>转换为数组
-//			        StringBuffer strBuffer = new StringBuffer();
-			        if(Constants.CellToParts[SourceIndex][TargetCell]!=null){
-			        	if(Constants.CellToParts[SourceIndex][TargetCell].size()!=0){
-			        		 int[] temp = new int [Constants.CellToParts[SourceIndex][TargetCell].size()]; 
-			        		 int k=0;
-			        		 for(int o :Constants.CellToParts[SourceIndex][TargetCell] ){
-//						        	strBuffer.append(o);
-//						        	temp = new int[]{Integer.parseInt(strBuffer.toString())};
-                                    temp[k]=o;
-                                    k++;
-//						        	strBuffer.delete(0, strBuffer.length());
-						     }
-			        		 chromosome.setPartSequence(SourceIndex,TargetCell,RandomPriors(temp));  
-			        	}		
-			        }			       			    			         
+//			      	  StringBuffer strBuffer = new StringBuffer();
+						if(Constants.CellToParts[SourceIndex][TargetCell]!=null){
+							if(Constants.CellToParts[SourceIndex][TargetCell].size()!=0){
+								int[] temp = new int [Constants.CellToParts[SourceIndex][TargetCell].size()]; 
+								int k=0;
+								for(int o :Constants.CellToParts[SourceIndex][TargetCell] ){
+//						    	    	strBuffer.append(o);
+//						   		     	temp = new int[]{Integer.parseInt(strBuffer.toString())};
+										temp[k]=o;
+										k++;
+//						 		       	strBuffer.delete(0, strBuffer.length());
+								}
+								chromosome.setPartSequence(SourceIndex,TargetCell,temp);  
+							}		
+						}			       			    			         
+					}
 				}
 			}
-			
+			else{
+				
+				for (int index = 0; index <mSetSize+1; index++) {                      
+	                 chromosome.setMachineSegment(index, RandomPriors(Constants.MachineToParts[index]));
+				}
+				                                                                      
+				for (int SourceIndex = 0; SourceIndex <vSetSize+1; SourceIndex++) {
+					int[] VehicleCellSquence = RandomPriors(Constants.CellToNextCells[SourceIndex]);
+//					if(VehicleCellSquence.length !=0){
+					chromosome.setVehicleSegment(SourceIndex,VehicleCellSquence);
+//					}
+					for (int TargetIndex = 0; TargetIndex <VehicleCellSquence.length; TargetIndex++){
+						int TargetCell = VehicleCellSquence[TargetIndex];
+
+				                                                   //Arraylist<Integer>转换为数组
+//				        StringBuffer strBuffer = new StringBuffer();
+				        if(Constants.CellToParts[SourceIndex][TargetCell]!=null){
+				        	if(Constants.CellToParts[SourceIndex][TargetCell].size()!=0){
+				        		 int[] temp = new int [Constants.CellToParts[SourceIndex][TargetCell].size()]; 
+				        		 int k=0;
+				        		 for(int o :Constants.CellToParts[SourceIndex][TargetCell] ){
+//							        	strBuffer.append(o);
+//							        	temp = new int[]{Integer.parseInt(strBuffer.toString())};
+	                                    temp[k]=o;
+	                                    k++;
+//							        	strBuffer.delete(0, strBuffer.length());
+							     }
+				        		 chromosome.setPartSequence(SourceIndex,TargetCell,RandomPriors(temp));  
+				        	}		
+				        }			       			    			         
+					}
+				}
+				
+			}
+				
 			double func_value = evaluation(chromosome);
 //			double func_value = 100.00;
 			chromosome.setFunction(func_value);
@@ -367,18 +432,115 @@ public class DABC {
 //
 //			System.out.println("第"+(i+1)+"个调度解的函数值:"+func_value);
 //			
+
+
 			}	
 		}
 	
+	
+	private void RulePrioirsReader(int msize, int csize, String filename) {
+		// TODO Auto-generated method stub
+		File file = new File(filename);
+		BufferedReader reader = null;
+		try {
+			reader 		   			  = new BufferedReader(new FileReader(file));
+
+			// 初始化单元信息&&机器对象
+			
+
+			
+			
+//			Constants.MachineToParts  = new int[msize+1][];
+//			Constants.CellToNextCells = new int[csize+1][];
+//			Constants.CellToParts	  = new ArrayList[csize+1][csize+1];
+//			for(int i = 1; i < csize+1; i++){
+//				for(int j = 1; j < csize+1; j++){
+//					Constants.CellToParts[i][j] = new ArrayList<Integer>();
+//				}
+//			}
+//			
+			
+			String line;
+			String[] seq = null;
+			
+			/**读取机器信息**/
+			for (int i = 1; i < msize+1; i++) {
+				Constants.MachineToParts[i] = new int[Constants.MachineToParts[i].length];
+				line = reader.readLine();
+				int m = line.indexOf(":");
+				String t = line.substring(m+1);
+				seq  = t.split(",");
+				for(int j = 0; j < Constants.MachineToParts[i].length;j++ ){
+					if(j==0){
+						Constants.MachineToParts[i][j] =0;
+					}
+					else{
+						Constants.MachineToParts[i][j] = Integer.parseInt(seq[j]);
+					}
+				}
+				
+				
+				
+			}
+			reader.readLine();// 空格行
+			
+			
+			/**读取InterCellSequence信息**/
+			for (int i = 1; i < csize+1; i++) {
+
+				for(int j = 1; j < csize+1;j++ ){
+					line = reader.readLine();
+					if(i!=j){
+						int m = line.indexOf(":");
+						String t = line.substring(m+1);
+						seq  = t.split(",");
+						for(int k =0;k < Constants.CellToParts[i][j].size();k++){
+							Constants.CellToParts[i][j].set(k, Integer.parseInt(seq[k]));
+						}
+					}
+				}
+			}
+			reader.readLine();// 空格行
+			
+			/**读取单元to单元信息**/
+			for (int i = 1; i < csize+1; i++) {
+				Constants.CellToNextCells[i] = new int[Constants.CellToNextCells[i].length];
+				line = reader.readLine();
+				int m = line.indexOf(":");
+				String t = line.substring(m+1);
+				seq  = t.split(",");
+				for(int j = 0 ; j < Constants.CellToNextCells[i].length; j++){
+					if(j==0){
+						Constants.CellToNextCells[i][j] =0;
+					}
+					else{
+						Constants.CellToNextCells[i][j] = Integer.parseInt(seq[j-1]);
+					}
+				}
+			}
+			
+
+		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	
+	}
 
 	void EmployedBees() throws CloneNotSupportedException
 	{
 		
 		/**Employed Bee Phase：
-	   * 对每个解用localsearch1得到neighbour，neighbour要与之前保证不同
+	   * 对每个解用localsearch1和localsearch2()得到neighbour，neighbour要与之前保证不同
 	   * 用评估函数比较source和neighbour的优劣，取优秀者赋给neighbour
-	   */
-		    LocalSearch1();
+	   */  
+//		for(int i=0;i<5;i++){
+		   LocalSearch1();
+//	   }
+//		for(int j=0;j<5;j++){  
+		    LocalSearch2();
+//		}
+
 		    
 		    
 	        /*end of employed bee phase*/
@@ -391,7 +553,15 @@ public class DABC {
 	   * 对从employed bee phase中得出的解采用localsearch2()，得到neighbour2
 	   * 比较对应neighbour和neighbour2，取优秀的赋给neighbour2
 	   */
-        LocalSearch2();
+      
+		
+		
+		if(Memory.size()!=0){
+			for(int i = 0;i<Population.size();i++){
+				Population.set(i, Mutation2(Population.get(i),i));
+			}
+		}
+		
 	   /*end of onlooker bee phase   */
 	}
 
@@ -541,6 +711,73 @@ public class DABC {
     	//对其进行变化，改进 并return
 		return New;
 	}
+    
+  /*Mutation2用于onlooker里，加入了新解旧解函数值的比较*/  
+    private Chromosome Mutation2(Chromosome origin, int index) throws CloneNotSupportedException{
+    	int msize = origin.getMachineSize();
+    	int vsize = origin.getVehicleSize();
+    	
+    	Chromosome New 	  = new Chromosome(msize,vsize);
+    	Chromosome X_best = GetFromPool(); 
+    	
+    	int X1_index;
+    	while(true){
+    		X1_index = (int)(Math.random () *POPULATION_SIZE);
+    		if(X1_index!=index) break;
+    	}
+		Chromosome X_1    = Population.get(X1_index);
+    	
+		Chromosome X_2    = GetFromPool();		//这里应该还要加上B集合
+		// 针对机器段
+		int[] tmp = new int[0];
+		New.setMachineSegment(0,tmp);
+    	for(int i = 1; i <= msize; i++){
+    		New.setMachineSegment(
+    				i, 
+    				MutateOperate(
+    						origin.getMachineSegment()[i],
+    						X_best.getMachineSegment()[i],
+    						X_1.getMachineSegment()[i],
+    						X_2.getMachineSegment()[i]
+    				)
+    		);		
+    	}
+    	//针对小车段
+    	New.setVehicleSegment(0, tmp);
+    	for(int i = 1; i <= vsize; i++){
+    		New.setVehicleSegment(
+    				i, 
+    				MutateOperate(
+    						origin.getVehicleSegment()[i],
+    						X_best.getVehicleSegment()[i],
+    						X_1.getVehicleSegment()[i],
+    						X_2.getVehicleSegment()[i]
+    				)
+    		);		
+    	}
+    	//针对单元间的工件
+    	for(int i = 1; i <= vsize; i++){
+    		for(int j = 1; j <= vsize; j++){
+    			if(i!=j){
+    				New.setPartSequence(i, j, 
+    								MutateOperate(
+    								ConvertToIntArray(origin.getPartSequence()[i][j]),
+    								ConvertToIntArray(X_best.getPartSequence()[i][j]),
+    								ConvertToIntArray(X_1.getPartSequence()[i][j]),
+    								ConvertToIntArray(X_2.getPartSequence()[i][j])
+    								)
+    				);
+    			}
+    		}
+    	}  
+    	New.setFunction(evaluation(New));
+    	 if(New.getFunction()<=origin.getFunction()){
+    		 origin=New;
+		    }
+//		    Population.set(index,origin.clone());
+    	//对其进行变化，改进 并return
+         return origin;
+	}
 
     /**
      * @Description get an random one from the Pool
@@ -681,7 +918,7 @@ public class DABC {
 	    for(i=0;i<POPULATION_SIZE;i++) {
 		       
 	    	chromosome=Population.get(i);
-//	    	chromosome.setFunction(evaluation(chromosome));
+	    	chromosome.setFunction(evaluation(chromosome));
 //	    	func_value=30;
 	    	neighbor2.MachineSegment = insert(chromosome.clone().getMachineSegment(),neighbor2.MachineSegment);
 			neighbor2.VehicleSegment = insert(chromosome.clone().getVehicleSegment(),neighbor2.VehicleSegment);
@@ -987,6 +1224,8 @@ public class DABC {
 				return;
 			}
 		}
+		
+		
 	}
 
 //	public static void main ( String[] args ) throws CloneNotSupportedException{
