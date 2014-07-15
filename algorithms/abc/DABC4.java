@@ -137,14 +137,14 @@ public class DABC4 {
 	 * @Description framework for DABC
 	 * 
 	 */
-	public void schedule() throws CloneNotSupportedException {
+	public void schedule(int caseIndex) throws CloneNotSupportedException {
 		
 		int iter=0;
-		init_population();
+		init_population(caseIndex);
 		updateBestChromosome();                       //保存种群中最好的那个调度解
 		System.out.println("本次循环开始");
 		for (iter=0;iter<MaxCycle;iter++){        //迭代数
-			System.out.println("第"+iter+"代：");
+//			System.out.println("第"+iter+"代：");
 			EmployedBees();
 		    OnlookerBees();
 		    updateBestChromosome();
@@ -251,7 +251,7 @@ public class DABC4 {
 				bestFunction  = evaluation(bestChromosome);
 		}
 //		System.out.println("该种群中最优秀的调度解：");
-		System.out.println("最优解的函数值:"+bestFunction);
+//		System.out.println("最优解的函数值:"+bestFunction);
 		return bestChromosome;
 	}
 	
@@ -325,7 +325,7 @@ public class DABC4 {
 	    * 应该是单独建立3个部分，可以切换，从而形成3组初始解产生机制
 		* ①GP产生；②rules产生；③random
 		* */
-	private void init_population() throws CloneNotSupportedException {                                   //单个解的初始
+	private void init_population(int caseIndex) throws CloneNotSupportedException {                                   //单个解的初始
         int i;		
         int mSetSize = mSet.size();
 		int vSetSize = cellSet.size();	              
@@ -335,27 +335,9 @@ public class DABC4 {
 			
 		for(i=0;i<POPULATION_SIZE;i++) {
 			if(i<24){
-
+				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/" +caseIndex+"/"+(i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/1/" + (i + 1));  //RulePrioirs初始解读取
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/2/" + (i + 1)); 
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/3/" + (i + 1)); 
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/4/" + (i + 1)); 
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/5/" + (i + 1)); 
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/6/" + (i + 1)); 
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/7/" + (i + 1)); 
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/8/" + (i + 1)); 
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/9/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/10/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/11/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/12/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/13/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/14/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/15/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/16/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/17/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/18/" + (i + 1));
-				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/19/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/20/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/19/" + (i + 1));
 				
 				for (int index = 1; index <mSetSize+1; index++) {                      
 					chromosome.setMachineSegment(index, Constants.MachineToParts[index]);
@@ -446,10 +428,6 @@ public class DABC4 {
 			reader 		   			  = new BufferedReader(new FileReader(file));
 
 			// 初始化单元信息&&机器对象
-			
-
-			
-			
 //			Constants.MachineToParts  = new int[msize+1][];
 //			Constants.CellToNextCells = new int[csize+1][];
 //			Constants.CellToParts	  = new ArrayList[csize+1][csize+1];
@@ -534,16 +512,8 @@ public class DABC4 {
 	   * 对每个解用localsearch1和localsearch2()得到neighbour，neighbour要与之前保证不同
 	   * 用评估函数比较source和neighbour的优劣，取优秀者赋给neighbour
 	   */  
-//		for(int i=0;i<5;i++){
-		   LocalSearch1();
-//	   }
-//		for(int j=0;j<5;j++){  
-		    LocalSearch2();
-//		}
-
-		    
-		    
-	        /*end of employed bee phase*/
+	   LocalSearch1();
+	   LocalSearch2();
     }
 
 	void OnlookerBees() throws CloneNotSupportedException
@@ -553,16 +523,11 @@ public class DABC4 {
 	   * 对从employed bee phase中得出的解采用localsearch2()，得到neighbour2
 	   * 比较对应neighbour和neighbour2，取优秀的赋给neighbour2
 	   */
-      
-		
-		
 		if(Memory.size()!=0){
 			for(int i = 0;i<Population.size();i++){
 				Population.set(i, Mutation2(Population.get(i),i));
 			}
 		}
-		
-	   /*end of onlooker bee phase   */
 	}
 
 	
