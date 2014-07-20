@@ -27,24 +27,24 @@ public class TransGP3 extends GPRuleBase implements ITransportorRule {
     double DD=e.getDueDate();
     double RT=e.getRelDate();
     return 
-    		Div( 
-    				 Add( 
+    		Div(
+    				 Add(
     					 Mul(
-    						 Add (RT ,DD)
+    						 Add( RT, DD)
     						,
-    						 Mul( 
-    							 Mul( PT ,DD)
+    						 Mul(
+    							 Mul( PT, DD)
     							,
     							 Sub( 0.7222472440182017 ,0.7222472440182017)
     							)
     						)
     					,
     					 Div(
-    						 Add( 
+    						 Add(
     							 Sub( DD ,RT)
     							,
-    							 Add( 
-    								 Sub( PT ,0.7222472440182017)
+    							 Add(
+    								 Sub( PT, 0.7222472440182017)
     								,
     								 Sub( RT ,PT)
     								)
@@ -53,24 +53,24 @@ public class TransGP3 extends GPRuleBase implements ITransportorRule {
     						 Sub( 
     							 Sub( PT, DD)
     							,
-    							 Sub( 0.7222472440182017 ,PT)
+    							 Sub( 0.7222472440182017, PT)
     							)
     						)
-    					) 
+    					)
     				,
     				 Sub(
     					 Mul(
     						 Sub(
-    							 Div(
-    								 Add( PT, RT)
+    							 Div( 
+    								 Add( PT ,RT)
     								,
     								 Mul(
-    									 Add( RT ,DD)
+    									 Add( RT,DD)
     									,
     									 Mul(
     										 Mul( PT ,DD)
     										,
-    										 Sub( 0.7222472440182017 ,0.7222472440182017)
+    										 Sub( 0.7222472440182017, 0.7222472440182017)
     										)
     									)
     								)
@@ -81,13 +81,13 @@ public class TransGP3 extends GPRuleBase implements ITransportorRule {
     						 Add(
     							 Sub( PT ,PT)
     							,
-    							 Mul( RT, RT)
+    							 Mul( RT ,RT)
     							)
     						)
     					,
-    					 Mul( 
+    					 Mul(
     						 Mul(
-    							 Sub( DD, PT)
+    							 Sub( DD ,PT)
     							,
     							 Div( PT ,PT)
     							)
@@ -97,21 +97,25 @@ public class TransGP3 extends GPRuleBase implements ITransportorRule {
     							,
     							 Div(
     								 Add( 
-    									 Add(
-    										 PT
-    										, 
-    										 Sub( RT ,0.7222472440182017)
-    										)
+    									 Sub( DD, RT)
     									,
-    									 Mul( 0.7222472440182017, DD)
+    									 Div(
+    										 Add( DD ,RT)
+    										,
+    										 Sub(
+    											 Sub( PT, DD)
+    											,
+    											 Sub( 0.7222472440182017 ,PT)
+    											)
+    										)
     									)
     								,
     								 Add(
-    									 Sub(
+    									 Sub( 
     										 Sub(
-    											 Div( 0.7222472440182017, PT)
+    											 Add( DD, RT)
     											,
-    											 Sub( RT, DD)
+    											 Sub( RT ,DD)
     											)
     										,
     										 PT
