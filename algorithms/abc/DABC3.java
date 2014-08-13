@@ -141,7 +141,9 @@ public class DABC3 {
 		
 		
 		for (iter=0;iter<MaxCycle;iter++){  //迭代数
-			System.out.println("第"+iter+"代：");
+			if(iter==100){
+				System.out.println("第"+iter+"代：");
+			}
 			EmployedBees();
 		    OnlookerBees();
 		    updateBestChromosome();
@@ -247,7 +249,7 @@ public class DABC3 {
 				bestFunction  = evaluation(bestChromosome);
 		}
 //		System.out.println("该种群中最优秀的调度解：");
-		System.out.println("最优解的函数值:"+bestFunction);
+		System.out.println(bestFunction);
 		return bestChromosome;
 	}
 	
@@ -332,8 +334,8 @@ public class DABC3 {
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/13/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/14/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/15/" + (i + 1));
-				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/16/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/17/" + (i + 1));
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/16/" + (i + 1));
+				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/17/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/18/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/19/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/20/" + (i + 1));
