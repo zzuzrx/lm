@@ -8,9 +8,9 @@ import com.lm.algorithms.AbstractScheduler;
 import com.lm.algorithms.MetaHeuristicScheduler;
 import com.lm.algorithms.SimpleScheduler;
 import com.lm.algorithms.abc.DABC;
-import com.lm.algorithms.abc.DABC1;
 import com.lm.algorithms.abc.DABC2;
 import com.lm.algorithms.abc.DABC3;
+import com.lm.algorithms.abc.DABC4;
 import com.lm.algorithms.ga.HSGA;
 import com.lm.algorithms.measure.IMeasurance;
 import com.lm.algorithms.measure.Makespan;
@@ -53,8 +53,35 @@ public class MetaMain {
 	public static void main(String[] args) throws IOException,
 			CloneNotSupportedException {
 		FullFactorExperiment(TWT);
-//			run_perf(TWT);
-//          DABC(makespan);
+//		ProcessDABC(TWT);
+//		RunDABC(TWT);
+		RunMutation(TWT);
+	}
+
+	/**
+	 * @Description run the process for 100 generations
+	 * @param measure
+	 * @throws IOException 
+	 * @throws CloneNotSupportedException 
+	 */
+	private static void ProcessDABC(MetaIMeasurance measure) throws IOException, CloneNotSupportedException {
+		// TODO Auto-generated method stub
+		StringBuilder resultFileName = new StringBuilder(80);
+		resultFileName.append("result/Process/")
+			.append(new Throwable().getStackTrace()[0].getMethodName())
+			.append("+").append(measure.toString());
+		System.out.println(resultFileName.toString());
+
+		for(int i = 0; i< Constants.TOTAL_PROBLEMS; i++){
+			BufferedWriter Process = new BufferedWriter(new FileWriter(
+					"ProCessing"+(i+1) ));
+			MySummaryStat stat=new MySummaryStat(Constants.PROBLEM_NAMES[i]);    //Trans文件读取
+			dr = new MetaCMSReader("data/Trans/IABC/" + (i + 1));                         
+			MachineSet machineSet = dr.getMachineSet();
+			JobSet jobSet = dr.getJobSet();
+			CellSet cellSet =dr.getCellSet();
+			simulationabc(measure,stat,machineSet,jobSet,cellSet);
+		}
 	}
 
 	/**
@@ -63,25 +90,67 @@ public class MetaMain {
 	 * @throws IOException
 	 * @throws CloneNotSupportedException 
 	 */
-	static void run_perf(MetaIMeasurance measure) throws IOException, CloneNotSupportedException {
+	static void RunDABC(MetaIMeasurance measure) throws IOException, CloneNotSupportedException {
 		StringBuilder resultFileName = new StringBuilder(80);
-		resultFileName.append("result/BestRule/").append(
+		resultFileName.append("result/ABC/").append(
 	               new Throwable().getStackTrace()[0].getMethodName());	        
 		System.out.println(resultFileName.toString());
 		
 		 printTitle(resultFileName.toString());
-		 for(int i=0;i<4;i++){
-			 for (int caseNo = 0; caseNo < Constants.TOTAL_PROBLEMS; caseNo++) {
+		 for (int caseNo = 0; caseNo < Constants.TOTAL_PROBLEMS; caseNo++) {
 	        	 System.out.println("case"+(caseNo+1)+":");
-	            dr = new MetaCMSReader("data/Trans/Case1/" + (caseNo + 1));
+	            dr = new MetaCMSReader("data/Trans/IABC/" + (caseNo + 1));
 		       	MachineSet machineSet = dr.getMachineSet();
 		        JobSet jobSet= dr.getJobSet();
 		        CellSet cellSet=dr.getCellSet();
 		        
 	           MySummaryStat stat=new MySummaryStat(Constants.PROBLEM_NAMES[caseNo]);
-	           simulationabc(measure,stat,machineSet,jobSet,cellSet);
-	           printResult(resultFileName.toString(), stat);
-	        }
+	           for (int ins = 0; ins < Constants.INSTANCES_PER_PROBLEM; ins++) {
+	        	   MetaHeuristicScheduler scheduler = new MetaHeuristicScheduler(machineSet, jobSet,cellSet);
+	        	   DABC abc = new DABC(machineSet, jobSet, cellSet, scheduler, measure);
+	        	   long start = System.currentTimeMillis();
+	        	   
+	        	   abc.schedule();
+	        	   
+	        	   stat.addTime(System.currentTimeMillis() - start);
+	        	   stat.value(abc.getBestFunctionValue()); 
+	  		 	}
+	 		 printResult(resultFileName.toString(), stat);
+		 }
+	}
+	
+	/**
+	 * 测试mutation方法
+	 * @param bia
+	 * @throws IOException
+	 * @throws CloneNotSupportedException 
+	 */
+	static void RunMutation(MetaIMeasurance measure) throws IOException, CloneNotSupportedException {
+		StringBuilder resultFileName = new StringBuilder(80);
+		resultFileName.append("result/ABC/").append(
+	               new Throwable().getStackTrace()[0].getMethodName());	        
+		System.out.println(resultFileName.toString());
+		
+		 printTitle(resultFileName.toString());
+		 for (int caseNo = 1; caseNo < Constants.TOTAL_PROBLEMS; caseNo++) {
+	        	 System.out.println("case"+(caseNo+1)+":");
+	            dr = new MetaCMSReader("data/Trans/IABC/" + (caseNo + 1));
+		       	MachineSet machineSet = dr.getMachineSet();
+		        JobSet jobSet= dr.getJobSet();
+		        CellSet cellSet=dr.getCellSet();
+		        
+	           MySummaryStat stat=new MySummaryStat(Constants.PROBLEM_NAMES[caseNo]);
+	           for (int ins = 0; ins < Constants.INSTANCES_PER_PROBLEM; ins++) {
+	        	   MetaHeuristicScheduler scheduler = new MetaHeuristicScheduler(machineSet, jobSet,cellSet);
+	        	   DABC4 abc = new DABC4(machineSet, jobSet, cellSet, scheduler, measure);
+	        	   long start = System.currentTimeMillis();
+	        	   
+	        	   abc.schedule(caseNo+1);
+	        	   
+	        	   stat.addTime(System.currentTimeMillis() - start);
+	        	   stat.value(abc.getBestFunctionValue()); 
+	  		 	}
+	 		 printResult(resultFileName.toString(), stat);
 		 }
 	}
 	/**
@@ -100,114 +169,64 @@ public class MetaMain {
 		DABC3 abc = new DABC3(machineSet, jobSet, cellSet, scheduler, measure);
 		abc.schedule();
 	}
-	
-//	static void DABC(IMeasurance measure) throws IOException, CloneNotSupportedException {
-//	    StringBuilder resultFileName = new StringBuilder(80);
-//        resultFileName.append("result/BestRule/").append(
-//                new Throwable().getStackTrace()[0].getMethodName());
-//        System.out.println(resultFileName.toString());
-//        
-//        BufferedWriter br = new BufferedWriter(new FileWriter(
-//				resultFileName.toString()));
-//		br.write(resultFileName.toString());
-//		br.newLine();
-//		
-//		/**调用简单的test**/
-//		dr = new MetaCMSReader("data/Trans/Case1/1");
-//		MachineSet machineSet = dr.getMachineSet();
-//        JobSet jobSet= dr.getJobSet();
-//        CellSet cellSet=dr.getCellSet();
-//		
-//		/**
-//        MetaHeuristicScheduler metaScheduler = new MetaHeuristicScheduler(machineSet, jobSet ,cellSet);
-//        metaScheduler.schedule();
-//		System.out.println("程序完成！makespan结果为:"+TWT.toString());	//simpleScheduler.getTotalWeightedTardiness()
-//		**/
-//		
-//		/**test abc**/
-//        MySummaryStat stat=new MySummaryStat(Constants.PROBLEM_NAMES[1]);
-//        simulationabc(measure,stat,machineSet,jobSet,cellSet);
-//        printResult(resultFileName.toString(), stat);
-//}
-//	
-//	
 	 
-		/**
-		 * 全因子(ANOVA)实验
-		 * @param measure
-		 * @throws IOException
-		 * @throws CloneNotSupportedException 
-		 */
-		static void FullFactorExperiment(MetaIMeasurance measure) throws IOException, CloneNotSupportedException {
+	 
+	/**
+	 * 全因子(ANOVA)实验
+	 * @param measure
+	 * @throws IOException
+	 * @throws CloneNotSupportedException 
+	 */
+	static void FullFactorExperiment(MetaIMeasurance measure) throws IOException, CloneNotSupportedException {
 
-		        StringBuilder resultFileName = new StringBuilder(80);
-		        resultFileName.append("result/ANOVA/")
-		                .append(new Throwable().getStackTrace()[0].getMethodName())
-		                .append("+").append(measure.toString());
-		        System.out.println(resultFileName.toString());
+	        StringBuilder resultFileName = new StringBuilder(80);
+	        resultFileName.append("result/ANOVA/")
+	                .append(new Throwable().getStackTrace()[0].getMethodName())
+	                .append("+").append(measure.toString());
+	        System.out.println(resultFileName.toString());
 
-		        BufferedWriter br = new BufferedWriter(new FileWriter(
-		                resultFileName.toString()));
+	        BufferedWriter br = new BufferedWriter(new FileWriter(
+	                resultFileName.toString()));
 
-//		        /*
-//		         * 全因子组合
-//		         */
-//		        int[] ps = { 6, 12, 24, 48 };
-//		        int[] gm = { 25, 50, 100, 500 };
-////		        int[] ps = { 12 };
-////		        double[] pc = { 0.9};
-////		        double[] pm = { 0.3};
-////		        int[] gm = { 100 };
-//		        printTitle(resultFileName.toString());
-//		        for (int iPs = 0; iPs < ps.length; iPs++) {
-//		                    for (int iGm = 0; iGm < gm.length; iGm++) {
-//		                        for (int caseNo = 0; caseNo < Constants.TOTAL_PROBLEMS; caseNo++) {
-//		                        	MySummaryStat stat=new MySummaryStat(Constants.PROBLEM_NAMES[caseNo]);
-//		                            dr = new MetaCMSReader("data/Trans/Case1/" + (caseNo + 1));
-//		                            MachineSet machineSet = dr.getMachineSet();
-//		        	        		JobSet jobSet = dr.getJobSet();
-//		        	        		CellSet cellSet =dr.getCellSet();
-//		                            for (int ins = 0; ins < Constants.INSTANCES_PER_PROBLEM; ins++) {
-//		                            	 simulationabc(measure,stat,machineSet,jobSet,cellSet);
-//		                            }
-//		                            printDOEResult(br, stat);
-//		                        }
-//		                    }
-//		                }
+//	        /*
+//	         * 全因子组合
+//	         */
+//	        int[] ps = { 6, 12, 24, 48 };
+//	        int[] gm = { 25, 50, 100, 500 };
+////	        int[] ps = { 12 };
+////	        double[] pc = { 0.9};
+////	        double[] pm = { 0.3};
+////	        int[] gm = { 100 };
+//	        printTitle(resultFileName.toString());
+//	        for (int iPs = 0; iPs < ps.length; iPs++) {
+//	                    for (int iGm = 0; iGm < gm.length; iGm++) {
+//	                        for (int caseNo = 0; caseNo < Constants.TOTAL_PROBLEMS; caseNo++) {
+//	                        	MySummaryStat stat=new MySummaryStat(Constants.PROBLEM_NAMES[caseNo]);
+//	                            dr = new MetaCMSReader("data/Trans/Case1/" + (caseNo + 1));
+//	                            MachineSet machineSet = dr.getMachineSet();
+//	        	        		JobSet jobSet = dr.getJobSet();
+//	        	        		CellSet cellSet =dr.getCellSet();
+//	                            for (int ins = 0; ins < Constants.INSTANCES_PER_PROBLEM; ins++) {
+//	                            	 simulationabc(measure,stat,machineSet,jobSet,cellSet);
+//	                            }
+//	                            printDOEResult(br, stat);
+//	                        }
+//	                    }
+//	                }
 //
-//		    }
-//		
-		/*
-         * GP、Rules、random性能对比实验
-         */
-        int[] ps = { 48 };        //种群数量
-        int[] gm = {  500 };     //迭代次数
-//        int[] ps = { 12 };
-//        double[] pc = { 0.9};
-//        double[] pm = { 0.3};
-//        int[] gm = { 100 };
-        printTitle(resultFileName.toString());
-        for (int iPs = 0; iPs < ps.length; iPs++) {
-                    for (int iGm = 0; iGm < gm.length; iGm++) {
-                        MySummaryStat stat=new MySummaryStat(Constants.PROBLEM_NAMES[15]);    //Trans文件读取
-                        dr = new MetaCMSReader("data/Trans/Case1/" + (15 + 1));                         
-                        MachineSet machineSet = dr.getMachineSet();
-        	        	JobSet jobSet = dr.getJobSet();
-        	        	CellSet cellSet =dr.getCellSet();
-                        for (int ins = 0; ins < Constants.INSTANCES_PER_PROBLEM; ins++) {
-                           simulationabc(measure,stat,machineSet,jobSet,cellSet);
-                        }
-                        printDOEResult(br, stat);
+//	    }
+//	
+	/*
+     * GP、Rules、random性能对比实验
+     */
+    int[] ps = { 48 };        //种群数量
+    int[] gm = {  500 };     //迭代次数
+//    int[] ps = { 12 };
+//    double[] pc = { 0.9};
+//    double[] pm = { 0.3};
+//    int[] gm = { 100 };
 
-                    }
-                }
-
-    }
-		
-		
-		
-		
-		
+}
 	/**
 	 * 输出数据头到文件中
 	 * @param fileName：文件名

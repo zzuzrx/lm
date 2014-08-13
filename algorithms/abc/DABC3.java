@@ -58,7 +58,7 @@ public class DABC3 {
 	/**the population's size. default=48**/
 	protected int POPULATION_SIZE=48;                       //修改量POPULATION_SIZE
 	/**the maxmum of iteration. default=100**/
-	protected final int MaxCycle=500;                              //修改量MaxCycle
+	protected final int MaxCycle=100;                              //修改量MaxCycle
 	//the input data for inter-cell problems
 	/**the machine's set **/
 	protected MachineSet mSet;
@@ -139,11 +139,14 @@ public class DABC3 {
 		updateBestChromosome();                       //保存种群中最好的那个调度解
 		
 		
-		
+		System.out.println("模拟开始");
 		for (iter=0;iter<MaxCycle;iter++){  //迭代数
+<<<<<<< HEAD
 			if(iter==100){
 				System.out.println("第"+iter+"代：");
 			}
+=======
+>>>>>>> origin/master
 			EmployedBees();
 		    OnlookerBees();
 		    updateBestChromosome();
@@ -152,7 +155,9 @@ public class DABC3 {
 			    System.out.println("该种群中最优秀的调度解：");
 				System.out.println("最优解的函数值:"+bestFunction);
 			}
+			System.out.println(bestFunction);
 		}
+		System.out.println("模拟结束");
 	}
 
 	
@@ -249,7 +254,11 @@ public class DABC3 {
 				bestFunction  = evaluation(bestChromosome);
 		}
 //		System.out.println("该种群中最优秀的调度解：");
+<<<<<<< HEAD
 		System.out.println(bestFunction);
+=======
+//		System.out.println("最优解的函数值:"+bestFunction);
+>>>>>>> origin/master
 		return bestChromosome;
 	}
 	
@@ -329,13 +338,17 @@ public class DABC3 {
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/8/" + (i + 1)); 
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/9/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/10/" + (i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/11/" + (i + 1));
+				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/11/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/12/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/13/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/14/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/15/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/16/" + (i + 1));
+<<<<<<< HEAD
 				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/17/" + (i + 1));
+=======
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/17/" + (i + 1));
+>>>>>>> origin/master
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/18/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/19/" + (i + 1));
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/20/" + (i + 1));

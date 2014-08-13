@@ -314,7 +314,7 @@ public class SimpleScheduler extends AbstractScheduler {
 
         }
 //        PrintFuncResult();
-    	FormPriorSequences();
+//    	FormPriorSequences();
 //        log.info("————————————————————————————————GA当前代试验结束————————————————————————————————");
     }
 
