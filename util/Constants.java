@@ -21,11 +21,6 @@ import com.lm.algorithms.rule.machine.MachineWSPT;
 import com.lm.algorithms.rule.machine.MachineGP1;
 import com.lm.algorithms.rule.machine.MachineGP2;
 import com.lm.algorithms.rule.machine.MachineGP3;
-import com.lm.algorithms.rule.machine.MachineGP4;
-import com.lm.algorithms.rule.machine.MachineGP5;
-import com.lm.algorithms.rule.machine.MachineGP6;
-import com.lm.algorithms.rule.machine.MachineGP7;
-import com.lm.algorithms.rule.machine.MachineGP8;
 import com.lm.algorithms.rule.transportor.ITransportorRule;
 import com.lm.algorithms.rule.transportor.TransEDD;
 import com.lm.algorithms.rule.transportor.TransFIFO;
@@ -33,10 +28,6 @@ import com.lm.algorithms.rule.transportor.TransOperAndTrans;
 import com.lm.algorithms.rule.transportor.TransOpersAndFIFO;
 import com.lm.algorithms.rule.transportor.TransGP1;
 import com.lm.algorithms.rule.transportor.TransGP2;
-import com.lm.algorithms.rule.transportor.TransGP3;
-import com.lm.algorithms.rule.transportor.TransGP4;
-import com.lm.algorithms.rule.transportor.TransGP5;
-import com.lm.algorithms.rule.transportor.TransGP6;
 
 public class Constants {
     public static final int TOTAL_CASE = 1;//为了测试修改成1.原来是18
@@ -91,6 +82,15 @@ public class Constants {
     /**机器--单元的哈希表关系**/
     public static Map<Integer, Integer> CellForm;	
     
+//    public static final String[] PROBLEM_NAMES = {
+//    	"1","2","3","4","5",
+//    	"6","7","8","9","10"
+//    	
+////    	"j5m6c3__3", "j15m8c3__3","j20m11c3__3",
+////    	"j40m13c5__5","j50m15c5__5","j60m16c5__5",
+////        "j70m20c7__7","j80m21c7__7","j90m21c7__7",
+////        "j100m25c9__9", "j200m50c15__15"
+//    };
     public static final String[] PROBLEM_NAMES = {
     	"j5m6c3__3", "j15m8c3__3","j20m11c3__3","j30m11c4_4",
     	"j40m13c5__5","j45m13c5_5","j50m15c5__5","j60m16c5__5","j65m18c6_6",

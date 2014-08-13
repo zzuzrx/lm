@@ -22,7 +22,7 @@ import com.lm.util.MapUtil;
 import com.lm.util.MaxPriorityQueue;
 import java.lang.StringBuffer;
 /*
- * @Description:DABC
+ * @Description:DABC class
  * 
  */
 
@@ -48,6 +48,8 @@ public class DABC {
 	protected HeapMaxPriorityQueue<Chromosome> Memory;
 	/**CurHeap**/
 	protected HeapMaxPriorityQueue<Chromosome> CurHeap;
+	/**Archive B**/
+	protected HeapMaxPriorityQueue<Chromosome> ArchiveB; 
     /**最佳染色体序列**/
 	protected Chromosome bestChromosome;
 	/**最差染色体序列**/
@@ -60,7 +62,8 @@ public class DABC {
 	protected final double MutateFactor1 = 0.5;
 	/**factor for x(r1) - x(2^)**/
 	protected final double MutateFactor2 = 0.5;
-	
+
+	protected final double LeadingFactor = 5;
 	//the input data for inter-cell problems
 	/**the machine's set **/
 	protected MachineSet mSet;
@@ -70,7 +73,6 @@ public class DABC {
 	protected CellSet cellSet;
     
 	
-		
 /***************************构造函数域***********************************************************************/
 	
 	/** 
@@ -107,8 +109,9 @@ public class DABC {
 		this.POPULATION_SIZE = populationSize;
 		this.evaluator = scheduler;
 		this.Population = new ArrayList<Chromosome>();
-		this.CurHeap = new HeapMaxPriorityQueue<Chromosome>(populationSize/5);
-		this.Memory  = new HeapMaxPriorityQueue<Chromosome>(populationSize);
+		this.CurHeap    = new HeapMaxPriorityQueue<Chromosome>(populationSize/5);
+		this.ArchiveB   = new HeapMaxPriorityQueue<Chromosome>(populationSize/5);
+		this.Memory     = new HeapMaxPriorityQueue<Chromosome>(populationSize);
 	}
 
 /*****************************************************************************************************/
@@ -141,26 +144,35 @@ public class DABC {
 		for (iter=0;iter<MaxCycle;iter++){                               //迭代数
 			EmployedBees();
 		    OnlookerBees();
+		    ScoutBees();
 		    updateBestChromosome();
 		    updateMemory();	
-		    ScoutBees();
 			if(iter==499){
 			    System.out.println("该种群中最优秀的调度解：");
 				System.out.println("最优解的函数值:"+bestFunction);
 			}
-			//System.out.println("代:"+iter+"的解："+bestFunction);
+//			System.out.println(bestFunction);
 		}
 	}
 
 	
 	/**
+	 * @throws CloneNotSupportedException 
 	 * @Description 根据这一代的迭代结果CurHeap，更新全局的memory
 	 */
-	private void updateMemory() {
-		// TODO Auto-generated method stub
-		for(Chromosome cur:CurHeap){
-			Memory.insert(cur);
+	private void updateMemory() throws CloneNotSupportedException {
+		// Age gets older
+		for(Chromosome cur:Memory){
+			cur.setAge(cur.getAge()+1);
 		}
+		
+		//Add new ones
+		for(Chromosome cur:CurHeap){
+			cur.setAge(0);
+			InsertInCollect(cur, Memory);
+//			Memory.insert(cur);
+		}
+		CurHeap = new HeapMaxPriorityQueue<Chromosome>(POPULATION_SIZE/5);
 	}
 
 	/**
@@ -234,7 +246,7 @@ public class DABC {
 				currentBestFunc = temp.getFunction();
 			}
 			/***添加到 每一代的Heap池中*/
-			InsertInHeap(temp);
+			InsertInCollect(temp,CurHeap);
 		}
 		
 		if (bestChromosome == null) {
@@ -251,18 +263,18 @@ public class DABC {
 	
 	
 	/**
-	 * @Description insert the candidate into the Heap
+	 * @Description insert the candidate into the Collect
 	 * @param temp
+	 * @param curHeap2 
 	 * @throws CloneNotSupportedException 
 	 */
-	private void InsertInHeap(Chromosome temp) throws CloneNotSupportedException {
-		// TODO Auto-generated method stub
-		for(Chromosome cur: CurHeap){
+	private void InsertInCollect(Chromosome temp, HeapMaxPriorityQueue<Chromosome> set) throws CloneNotSupportedException {
+		for(Chromosome cur: set){
 			if(cur.equals(temp)){
 				return;
 			}
 		}	
-		CurHeap.insert(temp.clone());	
+		set.insert(temp.clone());	
 	}
 
 	/**
@@ -313,12 +325,14 @@ public class DABC {
 		return worstChromosome;
 	}
 	
-	
-	/**初始化：
-		* 初始解的GP产生接口，初始解通过rules产生，初始解通过random产生
-	    * 应该是单独建立3个部分，可以切换，从而形成3组初始解产生机制
-		* ①GP产生；②rules产生；③random
-		* */
+	/**
+	 * @Description 
+	 * 初始化：
+	 * 初始解的GP产生接口，初始解通过rules产生，初始解通过random产生
+	 * 应该是单独建立3个部分，可以切换，从而形成3组初始解产生机制
+     * ①GP产生；②rules产生；③random
+	 * @throws CloneNotSupportedException
+	 */
 	private void init_population() throws CloneNotSupportedException {                                   //单个解的初始
         int i;		
         int mSetSize = mSet.size();
@@ -370,48 +384,54 @@ public class DABC {
 			}	
 		}
 	
-
+	/**
+	 * @Description Employed Bee Phase 
+     * 对每个解用localsearch1得到neighbour，neighbour要与之前保证不同
+     * 用评估函数比较source和neighbour的优劣，取优秀者赋给neighbour
+	 * @throws CloneNotSupportedException
+	 */
 	void EmployedBees() throws CloneNotSupportedException
 	{
-		
-		/**Employed Bee Phase：
-	   * 对每个解用localsearch1得到neighbour，neighbour要与之前保证不同
-	   * 用评估函数比较source和neighbour的优劣，取优秀者赋给neighbour
-	   */
 		    LocalSearch1();
-		    
-		    
-	        /*end of employed bee phase*/
+		    //LocalSearch2();  //加不加这个，视情况而定
     }
-
-	void OnlookerBees() throws CloneNotSupportedException
-	{
-	  /**onlooker Bee Phase
-      
-	   * 对从employed bee phase中得出的解采用localsearch2()，得到neighbour2
-	   * 比较对应neighbour和neighbour2，取优秀的赋给neighbour2
-	   */
-        LocalSearch2();
-	   /*end of onlooker bee phase   */
-	}
-
 	
 	/**
+	 * @Description onlooker Bee Phase
+	 * 对从employed bee phase中得出的解采用localsearch2()，得到neighbour2
+	 * 比较对应neighbour和neighbour2，取优秀的赋给neighbour2
+	 * @throws CloneNotSupportedException
+	 */
+	void OnlookerBees() throws CloneNotSupportedException
+	{
+//        LocalSearch2();		//old version
+		if(Memory.size()!=0){
+			for(int i = 0;i<Population.size();i++){
+				Chromosome origin = Population.get(i);
+				Chromosome New = Mutation(origin,i);
+		    	New.setFunction(evaluation(New));
+		    	if(New.getFunction()<=origin.getFunction()){
+					Population.set(i,New);
+		    	}
+			}
+		}else{
+			LocalSearch2();
+		}
+	}
+
+	/**
 	 * @Description Scoutbees' generation
+	 * 选出onlooker中赋完值的neighbour2中最差的设为scout
+	 * 对scout舍弃，利用random重新生成一个解加入neighbour2中
+     * 将neighbour2[][]赋值给foodnumber[][]
 	 * @throws CloneNotSupportedException
 	 */
 	void ScoutBees() throws CloneNotSupportedException
 	{
-		/**
-		 *scout bee phase
-		 *
-		 *选出onlooker中赋完值的neighbour2中最差的设为scout
-		 *对scout舍弃，利用random重新生成一个解加入neighbour2中
-		 *将neighbour2[][]赋值给foodnumber[][]
-		 */
-
 		//在所有neighbor2的population中找出最差的解，记为worstneighbor2
-		worstChromosome=worstSoFar(Population,worstChromosome);         
+		worstChromosome=worstSoFar(Population,worstChromosome);
+		InsertInCollect(worstChromosome,ArchiveB);
+		
 		int m=0;
 		for(int i=0;i<POPULATION_SIZE;i++){
 			if(worstChromosome.getFunction()==Population.get(i).getFunction()){
@@ -419,60 +439,55 @@ public class DABC {
 				break;
 			}
 		}
-		
-		/*****Mutationg generate*****/
-		Population.set(m, Mutation(worstChromosome,m));
-		/*****Mutationg End*****/
-		
-		/*****Randomly generate**
-		int mSetSize = mSet.size();
-		int vSetSize = cellSet.size();
-
-		for(int i=0;i<POPULATION_SIZE;i++) {
-			for (int index = 0; index <mSetSize+1; index++) {                      
-				worstChromosome.setMachineSegment(index, RandomPriors(Constants.MachineToParts[index]).clone());
-			}
-			                                                                      
-			for (int SourceIndex = 0; SourceIndex <vSetSize+1; SourceIndex++) {
-				int[] VehicleCellSquence = RandomPriors(Constants.CellToNextCells[SourceIndex]);
-//				if(VehicleCellSquence.length !=0){
-				worstChromosome.setVehicleSegment(SourceIndex,VehicleCellSquence);
-//				}
-				
-				for (int TargetIndex = 0; TargetIndex <VehicleCellSquence.length; TargetIndex++){
-					int TargetCell = VehicleCellSquence[TargetIndex];
-					if(Constants.CellToParts[SourceIndex][TargetCell]!=null){//在这里对从source到target的所对应序列是否为空进行判断
-						if(Constants.CellToParts[SourceIndex][TargetCell].size()!=0){
-							int[] temp =new int[Constants.CellToParts[SourceIndex][TargetCell].size()];                                                  //Arraylist<Integer>转换为数组
-//					        StringBuffer strBuffer = new StringBuffer();
-					        int k=0;
-			        		for(int o :Constants.CellToParts[SourceIndex][TargetCell] ){
-//						        	strBuffer.append(o);
-//						        	temp = new int[]{Integer.parseInt(strBuffer.toString())};
-                                  temp[k]=o;
-                                  k++;
-//						        	strBuffer.delete(0, strBuffer.length());
-						    }
-							worstChromosome.setPartSequence(SourceIndex,TargetCell,RandomPriors(temp));
+		if(Memory.size()!=0){
+			/*****Mutationg generate*****/
+			Population.set(m, Mutation(worstChromosome,m));
+		}else{
+			/*****Randomly generate**/    
+			int mSetSize = mSet.size();
+			int vSetSize = cellSet.size();
+	
+			for(int i=0;i<POPULATION_SIZE;i++) {
+				for (int index = 0; index <mSetSize+1; index++) {                      
+					worstChromosome.setMachineSegment(index, RandomPriors(Constants.MachineToParts[index]).clone());
+				}
+				                                                                      
+				for (int SourceIndex = 0; SourceIndex <vSetSize+1; SourceIndex++) {
+					int[] VehicleCellSquence = RandomPriors(Constants.CellToNextCells[SourceIndex]);
+	//				if(VehicleCellSquence.length !=0){
+					worstChromosome.setVehicleSegment(SourceIndex,VehicleCellSquence);
+	//				}
+					
+					for (int TargetIndex = 0; TargetIndex <VehicleCellSquence.length; TargetIndex++){
+						int TargetCell = VehicleCellSquence[TargetIndex];
+						if(Constants.CellToParts[SourceIndex][TargetCell]!=null){//在这里对从source到target的所对应序列是否为空进行判断
+							if(Constants.CellToParts[SourceIndex][TargetCell].size()!=0){
+								int[] temp =new int[Constants.CellToParts[SourceIndex][TargetCell].size()];                                                  //Arraylist<Integer>转换为数组
+	//					        StringBuffer strBuffer = new StringBuffer();
+						        int k=0;
+				        		for(int o :Constants.CellToParts[SourceIndex][TargetCell] ){
+	//						        	strBuffer.append(o);
+	//						        	temp = new int[]{Integer.parseInt(strBuffer.toString())};
+	                                  temp[k]=o;
+	                                  k++;
+	//						        	strBuffer.delete(0, strBuffer.length());
+							    }
+								worstChromosome.setPartSequence(SourceIndex,TargetCell,RandomPriors(temp));
+							}
+							else{
+								Constants.CellToParts[SourceIndex][TargetCell]=null;
+							}
 						}
-						else{
-							Constants.CellToParts[SourceIndex][TargetCell]=null;
-						}
+						     //System.out.println(SourceIndex+TargetCell);
 					}
-					     //System.out.println(SourceIndex+TargetCell);
 				}
 			}
+			worstChromosome.setFunction(evaluation(worstChromosome));
+			for(int i=1;i<worstChromosome.IntercellPartSequences.length;i++){
+				worstChromosome.IntercellPartSequences[i][0]=null;
+			}
+			Population.set(m, worstChromosome);
 		}
-		worstChromosome.setFunction(evaluation(worstChromosome));
-		for(int i=1;i<worstChromosome.IntercellPartSequences.length;i++){
-			worstChromosome.IntercellPartSequences[i][0]=null;
-		}
-		Population.set(m, worstChromosome);
-		**Randomly End******/
-		
-//		System.out.println("替换worstChromosome而新加入的调度解:");
-//		System.out.println(worstChromosome.getFunction());
-
 	}
 
 	/**
@@ -481,22 +496,20 @@ public class DABC {
 	 * @return
 	 */
     private Chromosome Mutation(Chromosome origin, int index) {
-    	int msize = origin.getMachineSize();
-    	int vsize = origin.getVehicleSize();
-    	
-    	Chromosome New 	  = new Chromosome(msize,vsize);
     	Chromosome X_best = GetFromPool(); 
-    	
-    	int X1_index;
-    	while(true){
-    		X1_index = (int)(Math.random () *POPULATION_SIZE);
-    		if(X1_index!=index) break;
-    	}
-		Chromosome X_1    = Population.get(X1_index);
-    	
-		Chromosome X_2    = GetFromPool();		//这里应该还要加上B集合
-		// 针对机器段
+		Chromosome X_1    = Population.get( GetAnotherNumber(index));
+//		Chromosome X_2    = GetFromPool();			// 无B集合的
+		Chromosome X_2    = GetFromPoolandB();		// 有B集合的
+		
+		Double AgingFactor = AgingCalu(X_best);
+		Double LeadingPowerFactor = LeadingPowerCalu(origin,X_best);		
+//		System.out.println("("+AgingFactor+","+LeadingPowerFactor+")");
+
+		int msize = origin.getMachineSize();
+    	int vsize = origin.getVehicleSize();
 		int[] tmp = new int[0];
+    	Chromosome New 	  = new Chromosome(msize,vsize);
+		// 针对机器段
 		New.setMachineSegment(0,tmp);
     	for(int i = 1; i <= msize; i++){
     		New.setMachineSegment(
@@ -505,7 +518,9 @@ public class DABC {
     						origin.getMachineSegment()[i],
     						X_best.getMachineSegment()[i],
     						X_1.getMachineSegment()[i],
-    						X_2.getMachineSegment()[i]
+    						X_2.getMachineSegment()[i],
+    						AgingFactor,
+    						LeadingPowerFactor
     				)
     		);		
     	}
@@ -518,7 +533,9 @@ public class DABC {
     						origin.getVehicleSegment()[i],
     						X_best.getVehicleSegment()[i],
     						X_1.getVehicleSegment()[i],
-    						X_2.getVehicleSegment()[i]
+    						X_2.getVehicleSegment()[i],
+    						AgingFactor,
+    						LeadingPowerFactor
     				)
     		);		
     	}
@@ -527,28 +544,90 @@ public class DABC {
     		for(int j = 1; j <= vsize; j++){
     			if(i!=j){
     				New.setPartSequence(i, j, 
-    								MutateOperate(
+    						MutateOperate(
     								ConvertToIntArray(origin.getPartSequence()[i][j]),
     								ConvertToIntArray(X_best.getPartSequence()[i][j]),
     								ConvertToIntArray(X_1.getPartSequence()[i][j]),
-    								ConvertToIntArray(X_2.getPartSequence()[i][j])
-    								)
+    								ConvertToIntArray(X_2.getPartSequence()[i][j]),
+    	    						AgingFactor,
+    	    						LeadingPowerFactor
+    						)
     				);
     			}
     		}
-    	}    	
+    	}  
     	
-    	//对其进行变化，改进 并return
+    	//return the changed one
 		return New;
 	}
 
     /**
+     * @Description get a different number compared to index
+     * @param index
+     * @return
+     */
+    private int GetAnotherNumber(int index) {
+    	int result;
+    	while(true){
+    		result = (int)(Math.random () *POPULATION_SIZE);
+    		if(result!=index) break;
+    	}		
+    	return result;
+	}
+
+	/**
+     * @Description Power Evaluate Mechanism
+	 *   控制参数范围在 1 - 0.417  (后期可调整)
+	 *   且一般来说，会落在 (可通过实验来验证下)
+     * @param origin
+     * @param xBest
+     * @return
+     */
+    private Double LeadingPowerCalu(Chromosome origin, Chromosome xBest) {
+//    	System.out.println(origin.getFunction()+":"+xBest.getFunction());    	
+		double GAP = (origin.getFunction() - xBest.getFunction())/origin.getFunction();
+//		System.out.println("GAP"+ GAP);
+//		System.out.println(Math.exp(GAP));
+		return LeadingFactor*(Math.exp(GAP) - 1);
+	}
+
+	/**
+     * @Description Aging deteriorate Mechanism
+     *   一般来说 aging年限会以100作为标尺
+	 *   控 制参数范围在 0.1 - 1
+     * @param xBest : global best choromos
+     * @return
+     */
+    private Double AgingCalu(Chromosome xBest) {
+    	if(xBest.getAge() == 0)
+    		return 1.0;
+    	else
+    		return Math.exp( -1.0*
+						(Math.log(xBest.getAge())/Math.log(100))
+		 	   );
+	}
+
+	/**
      * @Description get an random one from the Pool
      * @return
      */
     private Chromosome GetFromPool() {
     	int index = (int) (Math.random()*Memory.size());
     	return Memory.getIndex(index);
+	}
+ 
+    /**
+     * @Description get an random one from the Set of Pool and ArchiveB 
+     * @return
+     */
+    private Chromosome GetFromPoolandB() {
+    	int index = (int) (Math.random()* (Memory.size()+ArchiveB.size()) );
+    	if(index <Memory.size()){
+    		return Memory.getIndex(index);
+    	}
+    	else{
+    		return ArchiveB.getIndex(index-Memory.size());
+    	}
 	}
     
 	/**
@@ -568,6 +647,8 @@ public class DABC {
 	/**
      * @param MemoryBest 
 	 * @param X_2 
+	 * @param leadingPowerFactor 
+	 * @param agingFactor 
 	 * @param js 
 	 * @Description 具体的变异操作
      * 通过将优先级转化成可以比较的数值 -- 初定每个数值之间差值为1
@@ -575,7 +656,7 @@ public class DABC {
      * @param x2
      * @return
      */
-    private int[] MutateOperate(int [] X, int[] XBest, int[] X_1, int[] X_2){
+    private int[] MutateOperate(int [] X, int[] XBest, int[] X_1, int[] X_2, Double agingFactor, Double leadingPowerFactor){
     	Map<Integer, Double> Result        = new HashMap<Integer, Double>();
 
     	//优先级数组转化成可以比较数值大小的数组
@@ -585,6 +666,8 @@ public class DABC {
     	Map<Integer, Integer> Priors_X2    = new HashMap<Integer, Integer>();
     	
     	int count = 1;
+//    	double Factor = agingFactor * leadingPowerFactor;
+    	double Factor = 0.5;
     	for(int i = X.length - 1; i >=1; i--){	//第0位是0，无用数据，不用存储
     		Priors_X.put(X[i], count);
     		Priors_Xbest.put(XBest[i], count);
@@ -598,16 +681,16 @@ public class DABC {
 	    	for(int i = 1; i < X.length; i++){
 	    		Result.put(X[i],
 	    			Priors_X.get(X[i])+
-	    			MutateFactor1* ( Priors_Xbest.get(X[i]) - 	Priors_X.get(X[i])) +
-	    			MutateFactor2* ( Priors_X1.get(X[i]) 	- 	Priors_X2.get(X[i]))
+	    			Factor* ( Priors_Xbest.get(X[i]) - 	Priors_X.get(X[i])) 
+	    			+Factor*( Priors_X1.get(X[i]) 	- 	Priors_X2.get(X[i]))
 	    		);
 	    	}
     	}
     	else {					// did not have the memory history
 	    	for(int i = 1; i < X.length; i++){
 	    		Result.put(X[i],
-	    			Priors_X.get(X[i])+
-	    			MutateFactor2* ( Priors_X1.get(X[i]) 	- 	Priors_X2.get(X[i]))
+	    			Priors_X.get(X[i])*1.0
+	    			+MutateFactor2* ( Priors_X1.get(X[i]) 	- 	Priors_X2.get(X[i]))
 	    		);
 	    	}
     	}
@@ -616,9 +699,7 @@ public class DABC {
     	/**Make It Feasible
     	 * dispatch the job according the values
     	 * **/
-    	//sort
-    	Map<Integer, Integer> Sort = MapUtil.sortByValue(Result);
-    	
+    	Map<Integer, Integer> Sort = MapUtil.sortByValue(Result);      	//sort
     	if(X[0]==0){	//if head with 0
         	int [] New = new int[Result.size()+1];
 	    	New[0] = 0;
@@ -633,12 +714,12 @@ public class DABC {
 	    	}
 	    	return New;
 	    }
-
     }
-		/**
-         * @throws CloneNotSupportedException 
-         * @Description localsearch1 for ： 采用
-         */
+    
+    /**
+     * @Description localsearch1
+     * @throws CloneNotSupportedException
+     */
     private void LocalSearch1() throws CloneNotSupportedException {
 
 	    int i;
@@ -667,10 +748,10 @@ public class DABC {
 	    }
     }
 
-    /**
-     * @throws CloneNotSupportedException 
-     * @Description localsearch1 for ： 采用
-     */
+	/**
+	 * @Description localsearch2
+	 * @throws CloneNotSupportedException
+	 */
 	private void LocalSearch2() throws CloneNotSupportedException {
 	
 	    int i;

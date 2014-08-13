@@ -30,7 +30,11 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
     private double function;
 	/** probability of Chromosome that being selected*/
     private double prob;
-/***************************方法域***********************************************************************/
+    /** the lifespan of the chromosome**/
+    private int    age;
+    /** the function values of the last generation**/
+    private double LastBest;
+	/***************************方法域***********************************************************************/
     /** 
      * @Description constructed function
      * @param size
@@ -41,7 +45,8 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
         this.MachineSize	= msize;
         this.VehicleSize 	= vsize;
         MachineSegment 		= new int[msize+1][];
-        VehicleSegment			= new int[vsize+1][];
+        VehicleSegment		= new int[vsize+1][];
+        LastBest			= -1;
         IntercellPartSequences 	= new ArrayList[vsize+1][vsize+1];
         for(int i = 1; i < vsize+1; i++){
 			for(int j = 1; j < vsize+1; j++){
@@ -50,7 +55,15 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
 		}
     }
     
-    /**
+    public double getLastBest() {
+		return LastBest;
+	}
+
+	public void setLastBest(double lastBest) {
+		LastBest = lastBest;
+	}
+
+	/**
      * @Description get function values of Chromosomes
      * @return
      */
@@ -88,33 +101,33 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
      */
 //    @Override
     public boolean equals(Chromosome o){
-    	 for (int i = 1; i < o.MachineSegment.length; i++) {
-    		 if(MachineSegment[i]!=null){
-    			 for(int j = 0;j < o.MachineSegment[i].length; j++) {
-    				 if(MachineSegment[i][j]!=o.getMachinegene(i,j)) return false;
-    			 }
-    		 }
-    	 }
-    	 for(int i = 1; i < o.VehicleSegment.length;i++) {
-    		 if(VehicleSegment[i]!=null){
-    			 for(int j = 0;j < o.VehicleSegment[i].length;j++){
-    				 if(VehicleSegment[i][j]!=o.getVehicleSegment(i, j)) return false;
-    			 }
-    		 }
-    	 }
-    	 for(int i = 1; i< o.IntercellPartSequences.length;i++){
-    		 if(IntercellPartSequences[i]!=null){
-    			 for(int j = 0;j <o.IntercellPartSequences[i].length;j++){
-    				 if(IntercellPartSequences[i][j]!=null){
-    					 for(int k = 0;k < o.IntercellPartSequences[i][j].size();k++){
-    						 if(IntercellPartSequences[i][j].get(k)!=o.IntercellPartSequences[i][j].get(k)) return false;
-    					 }
-    				 }
-    			 }
-    		 }
-    	 }
-    	 return true;
-    }
+   	 for (int i = 1; i < o.MachineSegment.length; i++) {
+   		 if(MachineSegment[i]!=null){
+   			 for(int j = 0;j < o.MachineSegment[i].length; j++) {
+   				 if(MachineSegment[i][j]!=o.getMachinegene(i,j)) return false;
+   			 }
+   		 }
+   	 }
+   	 for(int i = 1; i < o.VehicleSegment.length;i++) {
+   		 if(VehicleSegment[i]!=null){
+   			 for(int j = 0;j < o.VehicleSegment[i].length;j++){
+   				 if(VehicleSegment[i][j]!=o.getVehicleSegment(i, j)) return false;
+   			 }
+   		 }
+   	 }
+   	 for(int i = 1; i< o.IntercellPartSequences.length;i++){
+   		 if(IntercellPartSequences[i]!=null){
+   			 for(int j = 0;j <o.IntercellPartSequences[i].length;j++){
+   				 if(IntercellPartSequences[i][j]!=null){
+   					 for(int k = 0;k < o.IntercellPartSequences[i][j].size();k++){
+   						 if(IntercellPartSequences[i][j].get(k)!=o.IntercellPartSequences[i][j].get(k)) return false;
+   					 }
+   				 }
+   			 }
+   		 }
+   	 }
+   	 return true;
+   }
     /**
      * @Description get gene of particular position on Machine Segment
      * @param index
@@ -166,7 +179,7 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
             	IntercellPartSequences[SourceIndex][tarindex].add(temp);	
 
             }
-  	        
+//    	IntercellPartSequences[SourceIndex][TargetIndex]= new String(partPrior2);    	
     }
     /**
      * @Description get size of Chromosomes
@@ -223,9 +236,6 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
     			}
     		}
     	}
-    	
-
-    
 //    	for( int i=0;i<gene.length;i++){
 //    		
 //    		if(gene[i].length!=0){
@@ -244,8 +254,6 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
 //    	}
 //        this.IntercellPartSequences =gene.clone() ;
     }
-
-
     /**
      * @Description get fitness
      * @return
@@ -279,15 +287,6 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
     public void setProb(double prob) {
         this.prob = prob;
     }
-    
-    public int getMachineSize() {
-        return MachineSize;
-    }
-    
-    public int getVehicleSize() {
-        return VehicleSize;
-    }
-    
 
 	
 	/* override the compareTo for Chromosome
@@ -312,4 +311,19 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
 	    return sb.toString();
 	}
 
+	public int getMachineSize() {
+		return MachineSize;
+	}
+
+	public int getVehicleSize() {
+		return VehicleSize;
+	}
+	
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
+	}
 }
