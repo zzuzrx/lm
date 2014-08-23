@@ -58,6 +58,7 @@ public class DABC4 {
 	
 	protected final double LeadingFactor = 0.5;
 	
+	protected final double AdatpiveFactor = 1.1;
 	//the input data for inter-cell problems
 	/**the machine's set **/
 	protected MachineSet mSet;
@@ -531,11 +532,14 @@ public class DABC4 {
 	 */
 	void EmployedBees() throws CloneNotSupportedException
 	{
-		    LocalSearch1();
-		    LocalSearch2();  //加不加这个，视情况而定
-//		for(int i = 0;i<Population.size();i++){
-//		    AdaptiveLocalSearch(Population.get(i));
-//		}
+//		    LocalSearch1();
+//		    LocalSearch2();  //加不加这个，视情况而定
+		for(int i = 0;i<Population.size();i++){
+			System.out.println("前"+Population.get(i).getFunction());
+		    AdaptiveLocalSearch(Population.get(i));
+		    System.out.println("后"+Population.get(i).getFunction());
+		    System.out.println("\n");
+		}
     }
 	
 	/**
@@ -706,15 +710,30 @@ public class DABC4 {
 
     /**
      * @param chromosome 
+     * @throws CloneNotSupportedException 
      * @Description self adaptive method for local search for employed bee
      * by adjusting the search depth
      * to balance the explore and exploit
      */
-//    private void AdaptiveLocalSearch(Chromosome cur) {
-//		
-//    	//
-//    	if()
-//	}
+    private void AdaptiveLocalSearch(Chromosome cur) throws CloneNotSupportedException {
+    	double rate = cur.getRate();
+    	if(Double.compare(rate,1)==0){							//采取步长为1的
+    		swap(cur);
+    		insert(cur);
+    	}else if(rate< this.AdatpiveFactor){	//采取步长为2的
+    		swap(cur);
+    		insert(cur);
+    		swap(cur);
+    		insert(cur);
+    	}else{									//采取步长为3的	
+    		swap(cur);
+    		insert(cur);
+    		swap(cur);
+    		insert(cur);
+    		swap(cur);
+    		insert(cur);
+    	}
+	}
 
     /**
      * @Description get a different number compared to index
@@ -905,7 +924,32 @@ public class DABC4 {
 //		    System.out.println("初始种群中第"+(i+1)+"个调度解经过ls1后的函数值："+chromosome.getFunction());
 	    }
     }
-
+    
+    private void insert(Chromosome cur) throws CloneNotSupportedException{
+    	Chromosome neighbor = new Chromosome(mSet.size(), cellSet.size()) ;
+    	neighbor.MachineSegment = insert(cur.clone().getMachineSegment(),neighbor.MachineSegment);
+		neighbor.VehicleSegment = insert(cur.clone().getVehicleSegment(),neighbor.VehicleSegment);
+		neighbor.IntercellPartSequences = insert(cur.clone().getPartSequence(), neighbor.IntercellPartSequences);            
+		double tmp = evaluation(neighbor);
+		if( tmp <= cur.getFunction()){
+			cur = neighbor.clone();
+			cur.setFunction(tmp);
+		}
+		return;
+    }
+    
+    private void swap(Chromosome cur) throws CloneNotSupportedException{
+    	Chromosome neighbor = new Chromosome(mSet.size(), cellSet.size()) ;
+    	neighbor.MachineSegment = swap(cur.clone().getMachineSegment(),neighbor.MachineSegment);
+		neighbor.VehicleSegment = swap(cur.clone().getVehicleSegment(),neighbor.VehicleSegment);
+		neighbor.IntercellPartSequences = swap(cur.clone().getPartSequence(), neighbor.IntercellPartSequences);
+		double tmp = evaluation(neighbor);
+		if( tmp <= cur.getFunction()){
+			cur = neighbor.clone();
+			cur.setFunction(tmp);
+		}
+		return;
+    }
     /**
      * @throws CloneNotSupportedException 
      * @Description localsearch1 for ： 采用

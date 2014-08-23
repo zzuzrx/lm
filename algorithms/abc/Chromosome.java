@@ -27,7 +27,8 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
     /** fitness of Chromosome*/
     private double fitness;
     /** function values of Chromosome*/
-    private double function;
+//    private double function;
+    private double functions[];
 	/** probability of Chromosome that being selected*/
     private double prob;
     /** the lifespan of the chromosome**/
@@ -47,12 +48,19 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
         MachineSegment 		= new int[msize+1][];
         VehicleSegment		= new int[vsize+1][];
         LastBest			= -1;
+    
         IntercellPartSequences 	= new ArrayList[vsize+1][vsize+1];
         for(int i = 1; i < vsize+1; i++){
 			for(int j = 1; j < vsize+1; j++){
 				IntercellPartSequences[i][j] = new ArrayList<Integer>();
 			}
 		}
+        
+//        function			= -1*Double.MAX_VALUE;
+        functions			= new double[3];		// 上上一代、上一代、当前值
+        functions[0]		= -1*Double.MAX_VALUE;
+        functions[1]		= -1*Double.MAX_VALUE;
+        functions[2]		= -1*Double.MAX_VALUE;
     }
     
     public double getLastBest() {
@@ -68,18 +76,22 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
      * @return
      */
     public double getFunction() {
-    	
-		return function;
+		return functions[2];
 	}
 
 	/**
-	 * @Description set function values of Chromosomes
+	 * @Description update function values of Chromosomes for current
+	 * Also store the function before
 	 * @param function
 	 */
 	public void setFunction(double function) {
-		this.function = function;
+		//更新上上一代
+		functions[0] = functions[1];
+		//更新上一代
+		functions[1] = functions[2];
+		//更新本次
+		functions[2] = function;
 	}
-
     /* (non-Javadoc):clone methods to copy a get function values of Chromosomes
      * @see java.lang.Object#clone()
      * override
@@ -295,7 +307,7 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
 	 */
 	public int compareTo(Chromosome o) {
 	    if (o == this) return 0;
-	    return new Double(function).compareTo(new Double(o.getFunction()));
+	    return new Double(functions[2]).compareTo(new Double(o.getFunction()));
 	}
 
 	/*  override the toString for Chromosome
@@ -325,5 +337,13 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
 
 	public void setAge(int age) {
 		this.age = age;
+	}
+
+	public double getRate() {
+		// TODO Auto-generated method stub
+		if(functions[0]== -1*Double.MAX_VALUE){
+			return 1;
+		}
+		else return functions[0]/functions[1];
 	}
 }
