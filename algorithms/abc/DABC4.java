@@ -59,6 +59,7 @@ public class DABC4 {
 	protected final double LeadingFactor = 0.5;
 	
 	protected final double AdatpiveFactor = 1.1;
+	
 	//the input data for inter-cell problems
 	/**the machine's set **/
 	protected MachineSet mSet;
@@ -718,24 +719,46 @@ public class DABC4 {
     private void AdaptiveLocalSearch(Chromosome cur) throws CloneNotSupportedException {
     	double rate = cur.getRate();
     	if(Double.compare(rate,1)==0){							//采取步长为1的
-    		swap(cur);
-    		insert(cur);
+    		cur.AddCount();
+    		if(cur.getcount()<10) {
+    			SearchStage1(cur);
+    		}else if(cur.getcount()<20){
+    			SearchStage2(cur);
+    		}else{
+    			SearchStage3(cur);
+    		}
     	}else if(rate< this.AdatpiveFactor){	//采取步长为2的
-    		swap(cur);
-    		insert(cur);
-    		swap(cur);
-    		insert(cur);
+    		SearchStage2(cur);
     	}else{									//采取步长为3的	
-    		swap(cur);
-    		insert(cur);
-    		swap(cur);
-    		insert(cur);
-    		swap(cur);
-    		insert(cur);
+    		SearchStage3(cur);
     	}
 	}
 
-    /**
+    private void SearchStage3(Chromosome cur) throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+    	swap(cur);
+		insert(cur);
+		swap(cur);
+		insert(cur);
+		swap(cur);
+		insert(cur);
+	}
+
+	private void SearchStage2(Chromosome cur) throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+    	swap(cur);
+		insert(cur);
+		swap(cur);
+		insert(cur);
+	}
+
+	private void SearchStage1(Chromosome cur) throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+    	swap(cur);
+		insert(cur);
+	}
+
+	/**
      * @Description get a different number compared to index
      * @param index
      * @return
@@ -934,6 +957,7 @@ public class DABC4 {
 		if( tmp <= cur.getFunction()){
 			cur = neighbor.clone();
 			cur.setFunction(tmp);
+			cur.clearCount();
 		}
 		return;
     }
@@ -947,6 +971,7 @@ public class DABC4 {
 		if( tmp <= cur.getFunction()){
 			cur = neighbor.clone();
 			cur.setFunction(tmp);
+			cur.clearCount();
 		}
 		return;
     }

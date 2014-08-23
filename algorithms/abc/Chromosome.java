@@ -29,6 +29,7 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
     /** function values of Chromosome*/
 //    private double function;
     private double functions[];
+    private int	   counttimes;
 	/** probability of Chromosome that being selected*/
     private double prob;
     /** the lifespan of the chromosome**/
@@ -61,6 +62,7 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
         functions[0]		= -1*Double.MAX_VALUE;
         functions[1]		= -1*Double.MAX_VALUE;
         functions[2]		= -1*Double.MAX_VALUE;
+        counttimes			= 0;
     }
     
     public double getLastBest() {
@@ -345,5 +347,20 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
 			return 1;
 		}
 		else return functions[0]/functions[1];
+	}
+
+	public void clearCount() {
+		// TODO Auto-generated method stub
+		counttimes=0;
+	}
+
+	public void AddCount() {
+		// TODO Auto-generated method stub
+		counttimes++;
+	}
+
+	public int getcount() {
+		// TODO Auto-generated method stub
+		return counttimes;
 	}
 }
