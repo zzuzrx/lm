@@ -22,35 +22,35 @@ import com.lm.util.MapUtil;
 public class DABC4 {
 
 
-/*******************************************属性域*******************************************************/
-	/**针对具体问题的调度过程**/
+/*******************************************灞炴�鍩�******************************************************/
+	/**閽堝鍏蜂綋闂鐨勮皟搴﹁繃绋�*/
 	protected MetaHeuristicScheduler evaluator;
-	/**适应度评估方法**/
+	/**閫傚簲搴﹁瘎浼版柟娉�*/
 	protected MetaIMeasurance measurance ;
-	/**用于随机的种子**/
+	/**鐢ㄤ簬闅忔満鐨勭瀛�*/
 	protected Random rand = new Random(System.currentTimeMillis());
-	/**最佳的适应度函数的value**/
+	/**鏈�匠鐨勯�搴斿害鍑芥暟鐨剉alue**/
 	protected double bestFunction = 0d;
-	/**最差的适应度函数的value**/
+	/**鏈�樊鐨勯�搴斿害鍑芥暟鐨剉alue**/
 	protected double worstFunction = 0d;
 	
-	//种群相关数据
-	/**每一代的种群**/
+	//绉嶇兢鐩稿叧鏁版嵁
+	/**姣忎竴浠ｇ殑绉嶇兢**/
 	protected List<Chromosome> Population;
-	/**记忆池**/
+	/**璁板繂姹�*/
 	protected HeapMaxPriorityQueue<Chromosome> Memory;
 	/**CurHeap**/
 	protected HeapMaxPriorityQueue<Chromosome> CurHeap;
 	/**Archive B**/
 	protected HeapMaxPriorityQueue<Chromosome> ArchiveB; 
-    /**最佳染色体序列**/
+    /**鏈�匠鏌撹壊浣撳簭鍒�*/
 	protected Chromosome bestChromosome;
-	/**最差染色体序列**/
+	/**鏈�樊鏌撹壊浣撳簭鍒�*/
 	protected Chromosome worstChromosome;
-	//算法参数
-	protected int POPULATION_SIZE=48;                       //修改量POPULATION_SIZE
+	//绠楁硶鍙傛暟
+	protected int POPULATION_SIZE=48;                       //淇敼閲廝OPULATION_SIZE
 	/**the maxmum of iteration. default=100**/
-	protected final int MaxCycle=100;                              //修改量MaxCycle
+	protected final int MaxCycle=100;                              //淇敼閲廙axCycle
 	/**factor for x(best) - x(i)**/
 	protected final double MutateFactor1 = 0.5;
 	/**factor for x(r1) - x(2^)**/
@@ -68,10 +68,10 @@ public class DABC4 {
     
 	
 		
-/***************************构造函数域***********************************************************************/
+/***************************鏋勯�鍑芥暟鍩�**********************************************************************/
 	
 	/** 
-	 * @Description:construction of DABC:默认参数
+	 * @Description:construction of DABC:榛樿鍙傛暟
 	 * @param mSet
 	 * @param jSet
 	 * @param cellSet
@@ -84,7 +84,7 @@ public class DABC4 {
 	}
 
 	/**
-	 * @Description:construction of DABC:自定义参数
+	 * @Description:construction of DABC:鑷畾涔夊弬鏁�
 	 * @param mSet
 	 * @param jSet
 	 * @param cellSet
@@ -111,15 +111,15 @@ public class DABC4 {
 
 /*****************************************************************************************************/
 
-/****************************方法域*********************************************************************/
-	/**目标函数&适应度函数：makespan或者totalweightedtardiness*/
+/****************************鏂规硶鍩�********************************************************************/
+	/**鐩爣鍑芥暟&閫傚簲搴﹀嚱鏁帮細makespan鎴栬�totalweightedtardiness*/
 
-	/**获取bestfunctionvalue**/
+	/**鑾峰彇bestfunctionvalue**/
 	public  double getBestFunctionValue() {
 	    return bestFunction; 
 	}
 	
-	/**获取worstfunctionvalue**/
+	/**鑾峰彇worstfunctionvalue**/
     public double getWorstFunctionValue(){
 		return worstFunction;
 	}
@@ -134,10 +134,10 @@ public class DABC4 {
 		
 		int iter=0;
 		init_population(caseIndex);
-		updateBestChromosome();                       //保存种群中最好的那个调度解
-//		System.out.println("本次循环开始");
-		for (iter=0;iter<MaxCycle;iter++){        //迭代数
-//			System.out.println("第"+iter+"代：");
+		updateBestChromosome();                       //淇濆瓨绉嶇兢涓渶濂界殑閭ｄ釜璋冨害瑙�
+//		System.out.println("鏈寰幆寮�");
+		for (iter=0;iter<MaxCycle;iter++){        //杩唬鏁�
+//			System.out.println("绗�+iter+"浠ｏ細");
 			
 			//emplyed bee's searching
 			if(iter == 0){ // first step: localsearch randomly
@@ -154,8 +154,8 @@ public class DABC4 {
 		    ScoutBees();
 			
 		    if(iter==499){
-			    System.out.println("该种群中最优秀的调度解：");
-				System.out.println("最优解的函数值:"+bestFunction);
+			    System.out.println("璇ョ缇や腑鏈�紭绉�殑璋冨害瑙ｏ細");
+				System.out.println("鏈�紭瑙ｇ殑鍑芥暟鍊�"+bestFunction);
 			}
 			System.out.println(bestFunction);
 		}
@@ -163,7 +163,7 @@ public class DABC4 {
 
 	
 	/**
-	 * @Description 根据这一代的迭代结果CurHeap，更新全局的memory
+	 * @Description 鏍规嵁杩欎竴浠ｇ殑杩唬缁撴灉CurHeap锛屾洿鏂板叏灞�殑memory
 	 */
 	private void updateMemory() {
 		// TODO Auto-generated method stub
@@ -211,10 +211,10 @@ public class DABC4 {
 		    	cellSet.get(i).setIntercellPartSequences(chromosome.IntercellPartSequences[i+1]);
 		    }
 //    		long start = System.currentTimeMillis();
-//    		System.out.println("初始Timer:"+Timer.currentTime());
+//    		System.out.println("鍒濆Timer:"+Timer.currentTime());
 			evaluator.schedule();
 //			long end   = System.currentTimeMillis();
-//			System.out.println("本次时间:"+(end-start)+"ms");
+//			System.out.println("鏈鏃堕棿:"+(end-start)+"ms");
 	
 			
 			return measurance.getMeasurance(evaluator);
@@ -242,7 +242,7 @@ public class DABC4 {
 				currentBest 	= temp;
 				currentBestFunc = temp.getFunction();
 			}
-			/***添加到 每一代的Heap池中*/
+			/***娣诲姞鍒�姣忎竴浠ｇ殑Heap姹犱腑*/
 			InsertInHeap(temp);
 		}
 		
@@ -253,8 +253,8 @@ public class DABC4 {
 				bestChromosome = currentBest;
 				bestFunction  = evaluation(bestChromosome);
 		}
-//		System.out.println("该种群中最优秀的调度解：");
-//		System.out.println("最优解的函数值:"+bestFunction);
+//		System.out.println("璇ョ缇や腑鏈�紭绉�殑璋冨害瑙ｏ細");
+//		System.out.println("鏈�紭瑙ｇ殑鍑芥暟鍊�"+bestFunction);
 		return bestChromosome;
 	}
 	
@@ -327,23 +327,23 @@ public class DABC4 {
 				worstFunction  = worstChromosome.getFunction();
 		}
 		
-//		System.out.println("该种群中最差的调度解：");
+//		System.out.println("璇ョ缇や腑鏈�樊鐨勮皟搴﹁В锛�);
 ////		System.out.println("MachineSegment:"+Arrays.toString(worstChromosome.MachineSegment));
 ////		System.out.println("VehicleSegment:"+Arrays.toString(worstChromosome.VehicleSegment));
 ////		System.out.println("InterCellSequence:"+Arrays.toString(worstChromosome.IntercellPartSequences));
-//		System.out.println("最差解的函数值:"+worstFunction);
+//		System.out.println("鏈�樊瑙ｇ殑鍑芥暟鍊�"+worstFunction);
 //		worstFunction=0;
 		
 		return worstChromosome;
 	}
 	
 	
-	/**初始化：
-		* 初始解的GP产生接口，初始解通过rules产生，初始解通过random产生
-	    * 应该是单独建立3个部分，可以切换，从而形成3组初始解产生机制
-		* ①GP产生；②rules产生；③random
+	/**鍒濆鍖栵細
+		* 鍒濆瑙ｇ殑GP浜х敓鎺ュ彛锛屽垵濮嬭В閫氳繃rules浜х敓锛屽垵濮嬭В閫氳繃random浜х敓
+	    * 搴旇鏄崟鐙缓绔�涓儴鍒嗭紝鍙互鍒囨崲锛屼粠鑰屽舰鎴�缁勫垵濮嬭В浜х敓鏈哄埗
+		* 鈶燝P浜х敓锛涒憽rules浜х敓锛涒憿random
 		* */
-	private void init_population(int caseIndex) throws CloneNotSupportedException {                                   //单个解的初始
+	private void init_population(int caseIndex) throws CloneNotSupportedException {                                   //鍗曚釜瑙ｇ殑鍒濆
         int i;		
         int mSetSize = mSet.size();
 		int vSetSize = cellSet.size();	              
@@ -354,7 +354,7 @@ public class DABC4 {
 		for(i=0;i<POPULATION_SIZE;i++) {
 			if(i<24){
 				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/" +caseIndex+"/"+(i + 1));
-//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/1/" + (i + 1));  //RulePrioirs初始解读取
+//				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/1/" + (i + 1));  //RulePrioirs鍒濆瑙ｈ鍙�
 //				RulePrioirsReader(mSetSize,vSetSize,"solutions/Case1/19/" + (i + 1));
 				
 				for (int index = 1; index <mSetSize+1; index++) {                      
@@ -369,7 +369,7 @@ public class DABC4 {
 					for (int TargetIndex = 0; TargetIndex <VehicleCellSquence.length; TargetIndex++){
 						int TargetCell = VehicleCellSquence[TargetIndex];
 
-			                                                   //Arraylist<Integer>转换为数组
+			                                                   //Arraylist<Integer>杞崲涓烘暟缁�
 //			      	  StringBuffer strBuffer = new StringBuffer();
 						if(Constants.CellToParts[SourceIndex][TargetCell]!=null){
 							if(Constants.CellToParts[SourceIndex][TargetCell].size()!=0){
@@ -402,7 +402,7 @@ public class DABC4 {
 					for (int TargetIndex = 0; TargetIndex <VehicleCellSquence.length; TargetIndex++){
 						int TargetCell = VehicleCellSquence[TargetIndex];
 
-				                                                   //Arraylist<Integer>转换为数组
+				                                                   //Arraylist<Integer>杞崲涓烘暟缁�
 //				        StringBuffer strBuffer = new StringBuffer();
 				        if(Constants.CellToParts[SourceIndex][TargetCell]!=null){
 				        	if(Constants.CellToParts[SourceIndex][TargetCell].size()!=0){
@@ -428,9 +428,9 @@ public class DABC4 {
 			chromosome.setFunction(func_value);
 					
 			AddToPopulation(Population,chromosome.clone());		
-//			System.out.println("该种群中调度解：");
+//			System.out.println("璇ョ缇や腑璋冨害瑙ｏ細");
 //
-//			System.out.println("第"+(i+1)+"个调度解的函数值:"+func_value);
+//			System.out.println("绗�+(i+1)+"涓皟搴﹁В鐨勫嚱鏁板�:"+func_value);
 //			
 
 
@@ -445,7 +445,7 @@ public class DABC4 {
 		try {
 			reader 		   			  = new BufferedReader(new FileReader(file));
 
-			// 初始化单元信息&&机器对象
+			// 鍒濆鍖栧崟鍏冧俊鎭�&鏈哄櫒瀵硅薄
 //			Constants.MachineToParts  = new int[msize+1][];
 //			Constants.CellToNextCells = new int[csize+1][];
 //			Constants.CellToParts	  = new ArrayList[csize+1][csize+1];
@@ -459,7 +459,7 @@ public class DABC4 {
 			String line;
 			String[] seq = null;
 			
-			/**读取机器信息**/
+			/**璇诲彇鏈哄櫒淇℃伅**/
 			for (int i = 1; i < msize+1; i++) {
 				Constants.MachineToParts[i] = new int[Constants.MachineToParts[i].length];
 				line = reader.readLine();
@@ -478,10 +478,10 @@ public class DABC4 {
 				
 				
 			}
-			reader.readLine();// 空格行
+			reader.readLine();// 绌烘牸琛�
 			
 			
-			/**读取InterCellSequence信息**/
+			/**璇诲彇InterCellSequence淇℃伅**/
 			for (int i = 1; i < csize+1; i++) {
 
 				for(int j = 1; j < csize+1;j++ ){
@@ -496,9 +496,9 @@ public class DABC4 {
 					}
 				}
 			}
-			reader.readLine();// 空格行
+			reader.readLine();// 绌烘牸琛�
 			
-			/**读取单元to单元信息**/
+			/**璇诲彇鍗曞厓to鍗曞厓淇℃伅**/
 			for (int i = 1; i < csize+1; i++) {
 				Constants.CellToNextCells[i] = new int[Constants.CellToNextCells[i].length];
 				line = reader.readLine();
@@ -525,14 +525,14 @@ public class DABC4 {
 
 	/**
 	 * @Description Employed Bee Phase 
-     * 对每个解用localsearch1得到neighbour，neighbour要与之前保证不同
-     * 用评估函数比较source和neighbour的优劣，取优秀者赋给neighbour
+     * 瀵规瘡涓В鐢╨ocalsearch1寰楀埌neighbour锛宯eighbour瑕佷笌涔嬪墠淇濊瘉涓嶅悓
+     * 鐢ㄨ瘎浼板嚱鏁版瘮杈僺ource鍜宯eighbour鐨勪紭鍔ｏ紝鍙栦紭绉��璧嬬粰neighbour
 	 * @throws CloneNotSupportedException
 	 */
 	void EmployedBees() throws CloneNotSupportedException
 	{
 		    LocalSearch1();
-		    LocalSearch2();  //加不加这个，视情况而定
+		    LocalSearch2();  //鍔犱笉鍔犺繖涓紝瑙嗘儏鍐佃�瀹�
 //		for(int i = 0;i<Population.size();i++){
 //		    AdaptiveLocalSearch(Population.get(i));
 //		}
@@ -540,8 +540,8 @@ public class DABC4 {
 	
 	/**
 	 * @Description onlooker Bee Phase
-	 * 对从employed bee phase中得出的解采用localsearch2()，得到neighbour2
-	 * 比较对应neighbour和neighbour2，取优秀的赋给neighbour2
+	 * 瀵逛粠employed bee phase涓緱鍑虹殑瑙ｉ噰鐢╨ocalsearch2()锛屽緱鍒皀eighbour2
+	 * 姣旇緝瀵瑰簲neighbour鍜宯eighbour2锛屽彇浼樼鐨勮祴缁檔eighbour2
 	 * @throws CloneNotSupportedException
 	 */
 	void OnlookerBees() throws CloneNotSupportedException
@@ -564,14 +564,14 @@ public class DABC4 {
 	
 	/**
 	 * @Description Scoutbees' generation
-	 * 选出onlooker中赋完值的neighbour2中最差的设为scout
-	 * 对scout舍弃，利用random重新生成一个解加入neighbour2中
-     * 将neighbour2[][]赋值给foodnumber[][]
+	 * 閫夊嚭onlooker涓祴瀹屽�鐨刵eighbour2涓渶宸殑璁句负scout
+	 * 瀵箂cout鑸嶅純锛屽埄鐢╮andom閲嶆柊鐢熸垚涓�釜瑙ｅ姞鍏eighbour2涓�
+     * 灏唍eighbour2[][]璧嬪�缁檉oodnumber[][]
 	 * @throws CloneNotSupportedException
 	 */
 	void ScoutBees() throws CloneNotSupportedException
 	{
-		//在所有neighbor2的population中找出最差的解，记为worstneighbor2
+		//鍦ㄦ墍鏈塶eighbor2鐨刾opulation涓壘鍑烘渶宸殑瑙ｏ紝璁颁负worstneighbor2
 		worstChromosome=worstSoFar(Population,worstChromosome);
 		InsertInCollect(worstChromosome,ArchiveB);
 		
@@ -603,9 +603,9 @@ public class DABC4 {
 					
 					for (int TargetIndex = 0; TargetIndex <VehicleCellSquence.length; TargetIndex++){
 						int TargetCell = VehicleCellSquence[TargetIndex];
-						if(Constants.CellToParts[SourceIndex][TargetCell]!=null){//在这里对从source到target的所对应序列是否为空进行判断
+						if(Constants.CellToParts[SourceIndex][TargetCell]!=null){//鍦ㄨ繖閲屽浠巗ource鍒皌arget鐨勬墍瀵瑰簲搴忓垪鏄惁涓虹┖杩涜鍒ゆ柇
 							if(Constants.CellToParts[SourceIndex][TargetCell].size()!=0){
-								int[] temp =new int[Constants.CellToParts[SourceIndex][TargetCell].size()];                                                  //Arraylist<Integer>转换为数组
+								int[] temp =new int[Constants.CellToParts[SourceIndex][TargetCell].size()];                                                  //Arraylist<Integer>杞崲涓烘暟缁�
 	//					        StringBuffer strBuffer = new StringBuffer();
 						        int k=0;
 				        		for(int o :Constants.CellToParts[SourceIndex][TargetCell] ){
@@ -641,8 +641,8 @@ public class DABC4 {
     private Chromosome Mutation(Chromosome origin, int index) {
     	Chromosome X_best = GetFromPool(); 
 		Chromosome X_1    = Population.get( GetAnotherNumber(index));
-//		Chromosome X_2    = GetFromPool();			// 无B集合的
-		Chromosome X_2    = GetFromPoolandB();		// 有B集合的
+//		Chromosome X_2    = GetFromPool();			// 鏃燘闆嗗悎鐨�
+		Chromosome X_2    = GetFromPoolandB();		// 鏈塀闆嗗悎鐨�
 		
 		Double AgingFactor = AgingCalu(X_best);
 		Double LeadingPowerFactor = LeadingPowerCalu(origin,X_best);		
@@ -652,7 +652,7 @@ public class DABC4 {
     	int vsize = origin.getVehicleSize();
 		int[] tmp = new int[0];
     	Chromosome New 	  = new Chromosome(msize,vsize);
-		// 针对机器段
+    	// 针对机器段
 		New.setMachineSegment(0,tmp);
     	for(int i = 1; i <= msize; i++){
     		New.setMachineSegment(
@@ -732,8 +732,8 @@ public class DABC4 {
 
 	/**
      * @Description Power Evaluate Mechanism
-	 *   控制参数范围在 1 - 0.417  (后期可调整)
-	 *   且一般来说，会落在 (可通过实验来验证下)
+	 *   鎺у埗鍙傛暟鑼冨洿鍦�1 - 0.417  (鍚庢湡鍙皟鏁�
+	 *   涓斾竴鑸潵璇达紝浼氳惤鍦�(鍙�杩囧疄楠屾潵楠岃瘉涓�
      * @param origin
      * @param xBest
      * @return
@@ -749,8 +749,8 @@ public class DABC4 {
 
 	/**
      * @Description Aging deteriorate Mechanism
-     *   一般来说 aging年限会以100作为标尺
-	 *   控 制参数范围在 0.1 - 1
+     *   涓�埇鏉ヨ aging骞撮檺浼氫互100浣滀负鏍囧昂
+	 *   鎺�鍒跺弬鏁拌寖鍥村湪 0.1 - 1
      * @param xBest : global best choromos
      * @return
      */
@@ -807,8 +807,8 @@ public class DABC4 {
 	 * @param leadingPowerFactor 
 	 * @param agingFactor 
 	 * @param js 
-	 * @Description 具体的变异操作
-     * 通过将优先级转化成可以比较的数值 -- 初定每个数值之间差值为1
+	 * @Description 鍏蜂綋鐨勫彉寮傛搷浣�
+     * 閫氳繃灏嗕紭鍏堢骇杞寲鎴愬彲浠ユ瘮杈冪殑鏁板� -- 鍒濆畾姣忎釜鏁板�涔嬮棿宸�涓�
      * @param x1
      * @param x2
      * @return
@@ -876,7 +876,7 @@ public class DABC4 {
     }
 		/**
          * @throws CloneNotSupportedException 
-         * @Description localsearch1 for ： 采用
+         * @Description localsearch1 for 锛�閲囩敤
          */
     private void LocalSearch1() throws CloneNotSupportedException {
 
@@ -885,7 +885,7 @@ public class DABC4 {
 //	    int b=3;
 	    Chromosome chromosome =new Chromosome(mSet.size(), cellSet.size());
 	    Chromosome neighbor1 = new Chromosome(mSet.size(), cellSet.size()) ;
-//	    Chromosome neighbor1 = new Chromosome(a, b) ;        //a是mSet.size(),  b是cellSet.size();
+//	    Chromosome neighbor1 = new Chromosome(a, b) ;        //a鏄痬Set.size(),  b鏄痗ellSet.size();
  
 	    for(i=0;i<POPULATION_SIZE;i++) {
 	       
@@ -894,7 +894,7 @@ public class DABC4 {
 //	    	func_value = 40;
 	    	neighbor1.MachineSegment = swap(chromosome.clone().getMachineSegment(),neighbor1.MachineSegment);
 			neighbor1.VehicleSegment =  swap(chromosome.clone().getVehicleSegment(),neighbor1.VehicleSegment);
-			neighbor1.IntercellPartSequences = swap(chromosome.clone().getPartSequence(),neighbor1.IntercellPartSequences);                   //swap的error是由于intersequence的类型引起的
+			neighbor1.IntercellPartSequences = swap(chromosome.clone().getPartSequence(),neighbor1.IntercellPartSequences);                   //swap鐨別rror鏄敱浜巌ntersequence鐨勭被鍨嬪紩璧风殑
 		
 			neighbor1.setFunction(evaluation(neighbor1));
 //	    	neighbor_func = 50;
@@ -902,13 +902,13 @@ public class DABC4 {
 			    chromosome=neighbor1;
 		    }
 		    Population.set(i,chromosome.clone());
-//		    System.out.println("初始种群中第"+(i+1)+"个调度解经过ls1后的函数值："+chromosome.getFunction());
+//		    System.out.println("鍒濆绉嶇兢涓"+(i+1)+"涓皟搴﹁В缁忚繃ls1鍚庣殑鍑芥暟鍊硷細"+chromosome.getFunction());
 	    }
     }
 
     /**
      * @throws CloneNotSupportedException 
-     * @Description localsearch1 for ： 采用
+     * @Description localsearch1 for 锛�閲囩敤
      */
 	private void LocalSearch2() throws CloneNotSupportedException {
 	
@@ -924,7 +924,7 @@ public class DABC4 {
 //	    	func_value=30;
 	    	neighbor2.MachineSegment = insert(chromosome.clone().getMachineSegment(),neighbor2.MachineSegment);
 			neighbor2.VehicleSegment = insert(chromosome.clone().getVehicleSegment(),neighbor2.VehicleSegment);
-			neighbor2.IntercellPartSequences = insert(chromosome.clone().getPartSequence(), neighbor2.IntercellPartSequences);                   //swap的error是由于intersequence的类型引起的
+			neighbor2.IntercellPartSequences = insert(chromosome.clone().getPartSequence(), neighbor2.IntercellPartSequences);                   //swap鐨別rror鏄敱浜巌ntersequence鐨勭被鍨嬪紩璧风殑
 			neighbor2.setFunction(evaluation(neighbor2));
 //			neighbor_func=50;
 		    
@@ -932,7 +932,7 @@ public class DABC4 {
 			    chromosome=neighbor2;
 		    }
 		    Population.set(i,chromosome.clone());
-//		    System.out.println("初始种群中第"+(i+1)+"个调度解经过ls2后的函数值："+chromosome.getFunction());
+//		    System.out.println("鍒濆绉嶇兢涓"+(i+1)+"涓皟搴﹁В缁忚繃ls2鍚庣殑鍑芥暟鍊硷細"+chromosome.getFunction());
 	    }
     }
 
@@ -950,7 +950,7 @@ public class DABC4 {
     				if(Sequences[i][j].size()!=0){
     					if(Sequences[i][j].size()!=2){
     			
-    						int[] temp =new int[Sequences[i][j].size()];                                                  //Arraylist<Integer>转换为数组
+    						int[] temp =new int[Sequences[i][j].size()];                                                  //Arraylist<Integer>杞崲涓烘暟缁�
 
 					        int k=0;
 			        		for(int o :Sequences[i][j]){
@@ -959,7 +959,7 @@ public class DABC4 {
                                   k++;
 //						        	
 						    }
-    						temp2 =temp;                                                        //对数组进行swap操作
+    						temp2 =temp;                                                        //瀵规暟缁勮繘琛宻wap鎿嶄綔
     						if(temp2.length!=0){
 //    	    			if(segment[index]!=null){
     							if(temp2.length!=2){
@@ -971,7 +971,7 @@ public class DABC4 {
     	    					
     							}
     						}
-    						for(int p = 0;p<temp2.length;p++){                                 //将数组转换回Arraylist<Integer>[][]
+    						for(int p = 0;p<temp2.length;p++){                                 //灏嗘暟缁勮浆鎹㈠洖Arraylist<Integer>[][]
     							int b =0;
     							b = temp2[p];
     							Sequences2[i][j].add(b);	
@@ -1025,7 +1025,7 @@ public class DABC4 {
     					if(Sequences[i][j].size()!=2){
     						
       						int[] temp2 =new int[Sequences[i][j].size()];
-      						int[] temp =new int[Sequences[i][j].size()];                                                  //Arraylist<Integer>转换为数组
+      						int[] temp =new int[Sequences[i][j].size()];                                                  //Arraylist<Integer>杞崲涓烘暟缁�
 
 					        int k=0;
 			        		for(int o :Sequences[i][j]){
@@ -1038,7 +1038,7 @@ public class DABC4 {
     						if(temp2.length!=0){
 //        			if(chromosome[index]!=null){
     							if(temp2.length!=2){
-    								int[] randoms = getRandomIndex (temp2.length);         //获取chromosome的优先级序列的长度
+    								int[] randoms = getRandomIndex (temp2.length);         //鑾峰彇chromosome鐨勪紭鍏堢骇搴忓垪鐨勯暱搴�
     								if (randoms[0] < randoms[1]){
             	
             		
@@ -1064,7 +1064,7 @@ public class DABC4 {
      								}
     							}
     						}
-    						for(int m = 0;m<temp2.length;m++){                                 //将数组转换回Arraylist<Integer>[][]
+    						for(int m = 0;m<temp2.length;m++){                                 //灏嗘暟缁勮浆鎹㈠洖Arraylist<Integer>[][]
     							int c =0;
     							c = temp2[m];
     							Sequences2[i][j].add(c);	
@@ -1096,7 +1096,7 @@ public class DABC4 {
     	if(chromosome2[index].length!=0){
 //    	if(chromosome[index]!=null){
     		if(chromosome2[index].length!=2){
-    			int[] randoms = getRandomIndex (chromosome2[index].length);         //获取chromosome的优先级序列的长度
+    			int[] randoms = getRandomIndex (chromosome2[index].length);         //鑾峰彇chromosome鐨勪紭鍏堢骇搴忓垪鐨勯暱搴�
     			if (randoms[0] < randoms[1]){
         	
         		
@@ -1181,7 +1181,7 @@ public class DABC4 {
 	 * @param source the source array
 	 * @return
 	 */
-	private int[] RandomPriors(int[] source) { //check source鏄�浼犻�锛岃繕鏄璞′紶閫�
+	private int[] RandomPriors(int[] source) { //check source閺勵垰锟芥导鐘伙拷閿涘矁绻曢弰顖氼嚠鐠炩�绱堕柅锟�
 		
 		if(source!=null){
 			if(source.length!=0){
@@ -1238,7 +1238,7 @@ public class DABC4 {
 //		
 //		 
 //		 test.schedule();
-//		 System.out.println("population："+test.Population);
+//		 System.out.println("population锛�+test.Population);
 //		   
 //	}
 
