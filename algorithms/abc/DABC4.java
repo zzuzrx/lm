@@ -58,7 +58,8 @@ public class DABC4 {
 	
 	protected final double LeadingFactor = 0.5;
 	
-	protected final double AdatpiveFactor = 1.1;
+	protected final double AdatpiveFactor = 1.03;
+	
 	//the input data for inter-cell problems
 	/**the machine's set **/
 	protected MachineSet mSet;
@@ -131,7 +132,7 @@ public class DABC4 {
 	 * @Description framework for DABC
 	 * 
 	 */
-	public void schedule(int caseIndex) throws CloneNotSupportedException {
+	public void schedule(int caseIndex) throws CloneNotSupportedException {            //结合版本
 		
 		int iter=0;
 		init_population(caseIndex);
@@ -146,6 +147,7 @@ public class DABC4 {
 //				LocalSearch2();
 			}else{
 				EmployedBees();
+
 			}
 		    //onlooker bee's searching
 			OnlookerBees();
@@ -158,9 +160,37 @@ public class DABC4 {
 			    System.out.println("该种群中最优秀的调度解：");
 				System.out.println("最优解的函数值:"+bestFunction);
 			}
-			System.out.println(bestFunction);
+			System.out.println("一代中最优的"+bestFunction);
 		}
 	}
+	
+//public void schedule(int caseIndex) throws CloneNotSupportedException {            //GP+Adaptive版本
+//		
+//		int iter=0;
+//		init_population(caseIndex);
+//		updateBestChromosome();                       //保存种群中最好的那个调度解
+////		System.out.println("本次循环开始");
+//		for (iter=0;iter<MaxCycle;iter++){        //迭代数
+////			System.out.println("第"+iter+"代：");
+//			
+//			//emplyed bee's searching
+//			if(iter == 0){ // first step: localsearch randomly
+//				LocalSearch1();
+//			}else{
+//				EmployedBees();
+//
+//			}
+//
+//		    updateBestChromosome();
+//
+//			
+//		    if(iter==499){
+//			    System.out.println("该种群中最优秀的调度解：");
+//				System.out.println("最优解的函数值:"+bestFunction);
+//			}
+//			System.out.println("一代中最优的"+bestFunction);
+//		}
+//	}
 
 	
 	/**
@@ -535,10 +565,20 @@ public class DABC4 {
 //		    LocalSearch1();
 //		    LocalSearch2();  //加不加这个，视情况而定
 		for(int i = 0;i<Population.size();i++){
-			System.out.println("前"+Population.get(i).getFunction());
-		    AdaptiveLocalSearch(Population.get(i));
-		    System.out.println("后"+Population.get(i).getFunction());
-		    System.out.println("\n");
+			
+//			if(i==5){
+//				System.out.println("    前"+Population.get(i).getFunction());
+//			}
+			
+			AdaptiveLocalSearch(Population.get(i));
+
+//		    if(i==6){
+//		    	System.out.println("    后"+Population.get(i).getFunction0());
+//		    	System.out.println("    后"+Population.get(i).getFunction1());
+//		    	System.out.println("    后"+Population.get(i).getFunction());
+//		    	System.out.println("\n");
+//		    }
+//			System.out.println(Population.get(i).getFunction());
 		}
     }
 	
@@ -718,24 +758,80 @@ public class DABC4 {
     private void AdaptiveLocalSearch(Chromosome cur) throws CloneNotSupportedException {
     	double rate = cur.getRate();
     	if(Double.compare(rate,1)==0){							//采取步长为1的
-    		swap(cur);
-    		insert(cur);
-    	}else if(rate< this.AdatpiveFactor){	//采取步长为2的
-    		swap(cur);
-    		insert(cur);
-    		swap(cur);
-    		insert(cur);
-    	}else{									//采取步长为3的	
-    		swap(cur);
-    		insert(cur);
-    		swap(cur);
-    		insert(cur);
-    		swap(cur);
-    		insert(cur);
+    		cur.AddCount();                                   //计数器+1
+    		if(cur.getcount()<50) {
+    			SearchStage1(cur);
+    		}else if(cur.getcount()<150){
+    			SearchStage2(cur);
+    		}else{
+    			SearchStage3(cur);
+    		}
+    	}
+    	else if(rate< this.AdatpiveFactor){	//采取步长为2的
+    		SearchStage2(cur);
+    	}else {									//采取步长为3的	
+    		SearchStage3(cur);
     	}
 	}
 
-    /**
+    private void SearchStage3(Chromosome cur) throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+    	Random rand = new Random();			
+		int k = rand.nextInt(2);
+		if(k==0){
+    		swap(cur);
+    		insert(cur);
+    		swap(cur);
+    		insert(cur);
+    		swap(cur);
+    		insert(cur);
+    	}else{
+    		insert(cur);
+    		insert(cur);
+    		insert(cur);
+    		insert(cur);
+    		swap(cur);
+    		swap(cur);
+    	}
+		cur.setFunction(cur.getFunction());
+	}
+
+	private void SearchStage2(Chromosome cur) throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+		Random rand = new Random();			
+		int k = rand.nextInt(2);
+		if(k==0){
+    		swap(cur);
+    		insert(cur);
+    		swap(cur);
+    		insert(cur);
+    		
+    	}else{
+    		insert(cur);
+    		swap(cur);
+    		swap(cur);
+    		swap(cur);
+    	}
+		cur.setFunction(cur.getFunction());
+	}
+
+	private void SearchStage1(Chromosome cur) throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+		Random rand = new Random();			
+		int k = rand.nextInt(2);
+		if(k==0){
+    		
+    		swap(cur);
+    		insert(cur);
+    		
+    	}else{
+    		swap(cur);
+    		swap(cur);
+    	}
+		cur.setFunction(cur.getFunction());
+	}
+
+	/**
      * @Description get a different number compared to index
      * @param index
      * @return
@@ -919,6 +1015,11 @@ public class DABC4 {
 //	    	neighbor_func = 50;
 		    if(neighbor1.getFunction()<=chromosome.getFunction()){
 			    chromosome=neighbor1;
+			    chromosome.setFunction0(neighbor1.getFunction());
+			    chromosome.setFunction1(neighbor1.getFunction());
+		    }else{
+		    	chromosome.setFunction0(chromosome.getFunction());
+			    chromosome.setFunction1(chromosome.getFunction());
 		    }
 		    Population.set(i,chromosome.clone());
 //		    System.out.println("初始种群中第"+(i+1)+"个调度解经过ls1后的函数值："+chromosome.getFunction());
@@ -931,9 +1032,14 @@ public class DABC4 {
 		neighbor.VehicleSegment = insert(cur.clone().getVehicleSegment(),neighbor.VehicleSegment);
 		neighbor.IntercellPartSequences = insert(cur.clone().getPartSequence(), neighbor.IntercellPartSequences);            
 		double tmp = evaluation(neighbor);
+		
 		if( tmp <= cur.getFunction()){
-			cur = neighbor.clone();
+//			System.out.println("abc");
+			cur.MachineSegment = neighbor.clone().getMachineSegment();
+			cur.VehicleSegment = neighbor.clone().getVehicleSegment();
+			cur.IntercellPartSequences = neighbor.clone().getPartSequence();
 			cur.setFunction(tmp);
+			cur.clearCount();
 		}
 		return;
     }
@@ -945,8 +1051,12 @@ public class DABC4 {
 		neighbor.IntercellPartSequences = swap(cur.clone().getPartSequence(), neighbor.IntercellPartSequences);
 		double tmp = evaluation(neighbor);
 		if( tmp <= cur.getFunction()){
-			cur = neighbor.clone();
+//			System.out.println("cba");
+			cur.MachineSegment = neighbor.clone().getMachineSegment();
+			cur.VehicleSegment = neighbor.clone().getVehicleSegment();
+			cur.IntercellPartSequences = neighbor.clone().getPartSequence();
 			cur.setFunction(tmp);
+			cur.clearCount();
 		}
 		return;
     }
@@ -1287,9 +1397,3 @@ public class DABC4 {
 //	}
 
 }
-
-
-
-
-  
-
