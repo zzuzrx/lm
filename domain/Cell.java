@@ -1,12 +1,19 @@
 package com.lm.domain;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.Vector;
 
 import com.lm.algorithms.rule.transportor.*;
 import com.lm.domain.Vehicle;
 import com.lm.util.Constants;
+import com.lm.util.MapUtil;
 
 /**
  * @Description 逻辑单元存储的类
@@ -222,37 +229,23 @@ public class Cell {
 	 * @return
 	 */
 	public List<Operation> SelectTransBatch(double[][][] cellToPartsFunc) {
-		// TODO Auto-generated method stub
 	    
-		// higher priority is preferred
+        Buffer SelectBuffer=null;	//本次要挑选的批次
+        double BestBenchmark=0;		//最好的benchmark值记录
+
         int NextCellCount=0;//下游单元的下标
         int curCell=id;//本单元号
         
         int nextCell;//下游单元号
 		int BestNextCell=0;//本次运输选中的下一个单元号
-
-        Buffer SelectBuffer=null;
-        double BestSum=Double.MAX_VALUE;
-        double BestBenchmark=0;
         
-        //当前cell信息
-//      Utils.echo("当前小车是单元"+name);
         for (Buffer CurBatch : JobBuffer) {//对每个Buffer中的工件都要用CalPrio，进行一个排序
-//        	Utils.echo("Buffer内容如下");
-//        	for(int i=0;i<CurBatch.getOperations().size();i++){
-//        		  Utils.echo(CurBatch.getOperations().get(i).toString());
-//        	}
-        	
-        	/**根据当前Buffer得到下一个去往的单元号**/
-        	nextCell=NextCell.get(NextCellCount++);
             double[] Scores=new double[CurBatch.size()];
             int OperaCount=0;
-            
+        	nextCell=NextCell.get(NextCellCount++); //根据当前Buffer得到下一个去往的单元号
+        	
         	for(Operation CurOperation:CurBatch.getOperations()){//选出合适的Operation
-        		//为了适应GP，calPrio的值改成越大越好了，即取了个反
-	            double score = TransRule.calPrio(CurOperation,curCell,nextCell);
-         
-	            
+	            double score = TransRule.calPrio(CurOperation,curCell,nextCell);//为适应GP，calPrio的值改成越大越好了，即取反
 	            if(score< -10000000) score=-10000000;
 	            else if(score > 10000000) score=10000000;
 	            
@@ -260,28 +253,27 @@ public class Cell {
         			CurBatch.get(OperaCount).setScore(score);
         		}
         		Scores[OperaCount++]=0-score;
-	            /**找到对应工件在Constants.cellToPartsFunc中的位置，然后更新Func的值**/
-        		 for(int i = 0; i < Constants.CellToParts[curCell][nextCell].size(); i++){
+        		
+        		 for(int i = 0; i < Constants.CellToParts[curCell][nextCell].size(); i++){	//找到对应工件位置，更新Func
               		if(Constants.CellToParts[curCell][nextCell].get(i) == CurOperation.getJob().getId()){
-              			//是否更新过值，若没有，附上新值
-              			if(cellToPartsFunc[curCell][nextCell][i] == Double.MAX_VALUE) {
+              			if(cellToPartsFunc[curCell][nextCell][i] == Double.MAX_VALUE) {	//第一次赋值
               			   cellToPartsFunc[curCell][nextCell][i] = -score;
-              			}
-              			//若更新过，与新值的结果取平均
-              			else{
+              			}else{	//多次赋值，取平均
               				cellToPartsFunc[curCell][nextCell][i] = ( -score + cellToPartsFunc[curCell][nextCell][i])/2;
               			}
               		}
-        		 }
-//        		System.out.println("score结果是"+score);
+        		 }// end of 更新值
             }
-        	/**对scores进行排序,注意arrays.sort是 从小到大排序,所以上面取反来存**/
-        	Arrays.sort(Scores);
+        	
+        	Arrays.sort(Scores);	//对scores进行排序,注意arrays.sort是 从小到大排序,所以上面取反来存
+
         	/**找到这次组成批的几个工序的score的和,并找到最合适的批**/
         	int i=0;
+            double BestSum=Double.MAX_VALUE;
         	double sum=0;
         	double CurBenchmark = 0;
             boolean Flag=false;
+            
         	while(i<transCar.getCapacity() && i< OperaCount){
         		Flag=true;
         		CurBenchmark=0-Scores[i++];
@@ -295,13 +287,9 @@ public class Cell {
         		BestNextCell=nextCell;
         	}
        }
-//        Utils.echo("最后选出的Buffer内容如下");
-//    	for(int i=0;i<SelectBuffer.getOperations().size();i++){
-//    		  Utils.echo(SelectBuffer.getOperations().get(i).toString());
-//    	}
         
        /**根据选出的SelectBuffer，找到 capacity个operation，组成小车要运输的批次 **/
-        List<Operation> resultBatch=new ArrayList<Operation>();;
+        List<Operation> resultBatch=new ArrayList<Operation>();
 		for (int i = 0; i < SelectBuffer.size(); i++) {
 			if(SelectBuffer.get(i).getScore()>=BestBenchmark){
 				resultBatch.add(SelectBuffer.get(i));
@@ -329,6 +317,156 @@ public class Cell {
 	}
 
 	/**
+	 * @param cellToPartsFunc for multiple destination cells
+	 * @return 路径表示的字符串
+	 * 示例  
+	 * 1: 2-3,4-2; 2:3-1;
+	 * (表示先把工序2-3，4-2运到1单元，再把工序3-1运到2单元)
+	 */
+	public StringBuffer SelectTransBatchForMultiple(double[][][] cellToPartsFunc) {
+
+		int curCell=id;			//本单元号
+        int Cell_ID=0;			//下游单元的下标
+        int nextCell;			//下游单元号
+        double[] ScoresForCells = new double[JobBuffer.size()];					//每个单元的评分
+        Map<Integer, Double> Map_Cells_Func = new HashMap<Integer, Double>();	//每个单元cell对应它评分的map
+        Map<Integer, Double> []Map_Ops_Func = new HashMap[JobBuffer.size()];	//单元内，operation对应它function值的map
+//        Map<Double, Integer> Map_Cells_Func = new TreeMap<Double, Integer>();	
+//        Map<Double, Integer> []Map_Ops_Func = new TreeMap[JobBuffer.size()];	
+        
+        for (Buffer CurBatch : JobBuffer) {										//对每个Buffer中的工件都CalPrio，进行排序
+ 
+        	nextCell=NextCell.get(Cell_ID); 									//得到下一个单元的编号
+        	Map_Ops_Func[Cell_ID]=new HashMap<Integer,Double>();				//TreeMap默认对key升序排序,所以是按Func有序的
+        	ScoresForCells[Cell_ID]=0;
+        	
+        	int OperaCount=0;													//count of operations
+        	for(Operation CurOperation:CurBatch.getOperations()){				//选出合适的Operation
+	            double score = TransRule.calPrio(CurOperation,curCell,nextCell);//为适应GP，calPrio的值改成越大越好了，即取反
+	            
+	            if(score< -10000000) score=-10000000;
+	            else if(score > 10000000) score=10000000;
+        		if(CurBatch.get(OperaCount).getScore()<score){ 
+        			CurBatch.get(OperaCount).setScore(score);
+        		}
+        		
+        		ScoresForCells[Cell_ID]+=0-score;
+        		Map_Ops_Func[Cell_ID].put(OperaCount++,0-score);
+        		
+        		for(int i = 0; i < Constants.CellToParts[curCell][nextCell].size(); i++){	//找到对应工件位置，更新Func
+              		if(Constants.CellToParts[curCell][nextCell].get(i) == CurOperation.getJob().getId()){
+              			if(cellToPartsFunc[curCell][nextCell][i] == Double.MAX_VALUE) {	//第一次赋值
+              			   cellToPartsFunc[curCell][nextCell][i] = -score;
+              			}else{	//多次赋值，取平均
+              				cellToPartsFunc[curCell][nextCell][i] = ( -score + cellToPartsFunc[curCell][nextCell][i])/2;
+              			}
+              			 break;
+              		}
+        		}// end of 更新值
+        	}//end for Operation
+        	Map_Ops_Func[Cell_ID] = MapUtil.sortByValue(Map_Ops_Func[Cell_ID]);
+        	
+        	if(OperaCount!=0){
+        		ScoresForCells[Cell_ID]/=OperaCount;
+                Map_Cells_Func.put(Cell_ID,ScoresForCells[Cell_ID]);
+        	}
+        	
+        	Cell_ID++;
+        }//end of JobBuffer
+        Map_Cells_Func = MapUtil.sortByValue(Map_Cells_Func);
+        
+        StringBuffer Routes=new StringBuffer("");				//运输路线的结果
+        int    BatchSum = 0;									//已经加入的工件数目
+        Vector<String> Batch_cell_name = new Vector<String>();	//批次中工序名字
+        
+        //按顺序选择批次当中的工件，再挑单元内工件）
+        for(int cell_id = 0 ; cell_id< JobBuffer.size(); cell_id++) {        		//先挑单元
+            
+        	if(Map_Cells_Func.containsKey(cell_id)){								//找到有工件buffer的下游单元
+	        	 
+        		Routes.append(NextCell.get(cell_id)).append(":");
+
+        		Boolean First_flag =true;
+        		
+	        	for(int ops_id = 0; ops_id <  Map_Ops_Func[cell_id].size(); ops_id++) {  	//在单元内，再挑工件
+	        		  
+	        		 String Cur_ops = JobBuffer.get(cell_id).get(ops_id).toString();		//当前工序名称
+	        		 
+	        		 if( CheckNotExist( Batch_cell_name , Cur_ops ) )  {  			
+		        		 
+	        			 Batch_cell_name.add(Cur_ops);
+	        			 
+	        			 if(First_flag){
+	        				 First_flag=false;
+	        			 }else{
+	        				 Routes.append(",");
+	        			 }
+		        		 Routes.append( Cur_ops);
+		        		 
+		        		 BatchSum++;
+		            	 if(BatchSum >= transCar.getCapacity())	{							//批次已满
+		            		 
+		            		 DeleteOps(Batch_cell_name);
+		            		 
+		            		 Routes.append(";");
+		            		 return Routes;
+		            	 }
+	        		 }
+	        	}//end for Ops
+        		
+	        	Routes.append(";");
+        	}
+        }// end for cell
+        
+        DeleteOps(Batch_cell_name);
+        return Routes;
+	}
+	
+	/**
+	 * delete chosen parts（0~ops_id） from the jobBuffer of Cell cell_id
+	 * and set the next machine for the part
+	 * @param batch_ops_name
+	 * @param cell_id
+	 * @param ops_id
+	 */
+	private void DeleteOps(Vector<String> batch_ops_name) {
+		
+	   for(int ops_id = 0; ops_id < batch_ops_name.size(); ops_id++){
+		   
+		    String cur = batch_ops_name.get(ops_id);
+		    
+		   	for(int cell_id = 0 ; cell_id< JobBuffer.size(); cell_id++) { 		//遍历每个buffer
+				 for(int buffer_ops_id = 0; buffer_ops_id < JobBuffer.get(cell_id).size(); buffer_ops_id++){
+					 if(cur.equals(JobBuffer.get(cell_id).get(buffer_ops_id).toString())) {
+						 
+						 Operation Buffer_ops = JobBuffer.get(cell_id).get(buffer_ops_id);
+						 
+						 JobBuffer.get(cell_id).removeOperation(				//remove from the buffer
+								 Buffer_ops);
+						 break;
+					 }
+				 }//end for ops
+			}//end for buffers
+		}
+	}
+
+	/**
+	 * 通过比对工序的名称，确保它是否已经被选在了批次里面
+	 * @param batch_ops_name
+	 * @param string
+	 * @return
+	 */
+	private boolean CheckNotExist(Vector<String> batch_ops_name, String string) {
+		
+		for(int i = 0; i < batch_ops_name.size(); i++) {
+			if ( batch_ops_name.get(i).equals(string) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * @Description 输出目标单元信息--用于测试
 	 */
 	public void printNextCell() {
@@ -353,4 +491,6 @@ public class Cell {
 		// TODO Auto-generated method stub
 		TransRule=iTransportorRule;
 	}
+
+
 }

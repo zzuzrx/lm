@@ -11,6 +11,11 @@ import com.lm.algorithms.rule.machine.MachineAT_RPT;
 import com.lm.algorithms.rule.machine.MachineCR;
 import com.lm.algorithms.rule.machine.MachineEDD;
 import com.lm.algorithms.rule.machine.MachineFIFO;
+import com.lm.algorithms.rule.machine.MachineGP4;
+import com.lm.algorithms.rule.machine.MachineGP5;
+import com.lm.algorithms.rule.machine.MachineGP6;
+import com.lm.algorithms.rule.machine.MachineGP7;
+import com.lm.algorithms.rule.machine.MachineGP8;
 import com.lm.algorithms.rule.machine.MachinePT_TIS;
 import com.lm.algorithms.rule.machine.MachineSL;
 import com.lm.algorithms.rule.machine.MachineSPT;
@@ -24,6 +29,9 @@ import com.lm.algorithms.rule.machine.MachineGP3;
 import com.lm.algorithms.rule.transportor.ITransportorRule;
 import com.lm.algorithms.rule.transportor.TransEDD;
 import com.lm.algorithms.rule.transportor.TransFIFO;
+import com.lm.algorithms.rule.transportor.TransGP3;
+import com.lm.algorithms.rule.transportor.TransGP5;
+import com.lm.algorithms.rule.transportor.TransGP6;
 import com.lm.algorithms.rule.transportor.TransOperAndTrans;
 import com.lm.algorithms.rule.transportor.TransOpersAndFIFO;
 import com.lm.algorithms.rule.transportor.TransGP1;
@@ -36,24 +44,28 @@ public class Constants {
     public static final String CMS_SOURCE = "data/Trans/Case1/";
 
 	/** 机器选工件调度规则 */
-//    public static final IMachineRule[] mRules = { new MachineSPT(),
-//            new MachineEDD(), new MachinePT_TIS(), new MachineTIS(),
-//            new MachinePT_TIS(), new MachineAT_RPT(), new MachineSL(),
-//            new MachineCR(), new MachineSRPT(), new MachineWSPT(),
-//            new MachineWEDD()};
-    public static final IMachineRule[] mRules = { 
-//    	new MachineWSPT(),
-    	new MachineEDD(),
-//    	new MachineGP1(),
-    	new MachinePT_TIS(),
-    	new MachineAT_RPT(),new MachineSL(), new MachineSRPT(),
-//    	new MachineGP2(),
-//    	new MachineWEDD(), 
-    	new MachineCR(),
-//    	new MachineGP3(),new MachineGP4(),
-//    	new MachineGP5(),new MachineGP6(),new MachineGP7(),
-//    	new MachineGP8(),
+    public static final IMachineRule[] mRules = { new MachineSPT(),
+            new MachineEDD(), new MachinePT_TIS(),
+//            new MachineTIS(),new MachinePT_TIS(), new MachineAT_RPT(),
+//            new MachineSL(),new MachineCR(), new MachineSRPT(), new MachineWSPT(),
+//            new MachineWEDD(),
+            new MachineGP1(),new MachineGP2(),new MachineGP3(),new MachineGP4(),
+	    	new MachineGP5(),new MachineGP6(),new MachineGP7(),
+	    	new MachineGP8(),
     };
+//    public static final IMachineRule[] mRules = { 
+////    	new MachineWSPT(),
+//    	new MachineEDD(),
+////    	new MachineGP1(),
+//    	new MachinePT_TIS(),
+//    	new MachineAT_RPT(),new MachineSL(), new MachineSRPT(),
+////    	new MachineGP2(),
+////    	new MachineWEDD(), 
+//    	new MachineCR(),
+////    	new MachineGP3(),new MachineGP4(),
+////    	new MachineGP5(),new MachineGP6(),new MachineGP7(),
+////    	new MachineGP8(),
+//    };
     public static String RULESET_DIR = "RulePrioirs/Case1/";
     public static int MachineRuleIndex;
     /**Transportor调度规则*/
@@ -61,11 +73,10 @@ public class Constants {
 //    	  new TransOperAndTrans(),new TransFIFO(),new TransEDD(),new TransOpersAndFIFO()
 //      };
     public static final ITransportorRule[] TRules = {
-    	new TransOperAndTrans(),new TransOpersAndFIFO(),
-    	new TransFIFO(),new TransEDD(),
-//    	new TransGP1(),new TransGP2(),new TransGP3(),
-//    	new TransGP4(),
-//    	new TransGP5(),new TransGP6()
+//    	new TransOperAndTrans(),new TransOpersAndFIFO(),
+//    	new TransFIFO(),new TransEDD(),
+    	new TransGP1(),new TransGP2(),new TransGP3(),
+    	new TransGP5(),new TransGP6()
     };
     public static int TransRuleIndex;
  

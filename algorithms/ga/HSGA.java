@@ -30,7 +30,7 @@ import com.lm.util.Constants;
 public class HSGA{
 /*每一种fuction结果对应的染色体，最多允许出现在种群中的次数*/	
 private static final int MAX_AMOUNT_OF_EACH_CHROMOS = 8;
-private static final int MIN_AMOUNT_OF_EACH_CHROMOS = 2;
+private static final int MIN_AMOUNT_OF_EACH_CHROMOS = 4;
 /***************************属性域***********************************************************************/
 	/**针对具体问题的GA's evalution process**/
 	protected AbstractScheduler evaluator;
@@ -177,7 +177,10 @@ private static final int MIN_AMOUNT_OF_EACH_CHROMOS = 2;
 
 			LocalSearch();
 			
-			System.out.println("代 " + currentGen + "\t" + bestFunction+ "\t" + bestFitness);
+//			System.out.println("代 " + currentGen + "\t" + bestFunction+ "\t"+
+//					Outputchromos(bestmChromosome)+"\t"+
+//					Outputchromos(bestTransChromosome)
+//			);
 			
 			for (int index = 0; index < POPULATION_SIZE; index++) {
 				func_value = evaluation(mPopulation.get(index),transPopulation.get(index));
@@ -211,8 +214,19 @@ private static final int MIN_AMOUNT_OF_EACH_CHROMOS = 2;
 //			VirusOperator();					//后期扩展来做，病毒变异
 			Catastrophe(currentGen);			//choose to change the args or not?
 		}
+		//进化结束
+		System.out.println(bestFunction+ "\t"+
+				Outputchromos(bestmChromosome)+"\t"+
+				Outputchromos(bestTransChromosome)
+		);
 	}
 	
+	private String Outputchromos(Chromosome Chromos) {
+		if(Chromos == null)
+			return "null";
+		return Chromos.toString();
+	}
+
 	/**
 	 * @Description Catastrophe Operator(灾变遗传操作)
 	 */
@@ -526,6 +540,7 @@ private static final int MIN_AMOUNT_OF_EACH_CHROMOS = 2;
 				SelectionAdd(mPopulation,mchromosome.clone(),MIN_AMOUNT_OF_EACH_CHROMOS);
 				SelectionAdd(transPopulation,bchromosome.clone(),MIN_AMOUNT_OF_EACH_CHROMOS);
 		}
+//		System.out.println("初始化结束");
 	}
 	/**
 	 * @Description Add the new chromosome to current population

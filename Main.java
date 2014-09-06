@@ -21,10 +21,10 @@ import com.lm.algorithms.rule.transportor.TransFIFO;
 import com.lm.algorithms.rule.transportor.TransGP1;
 import com.lm.algorithms.rule.transportor.TransOperAndTrans;
 import com.lm.algorithms.rule.transportor.TransOpersAndFIFO;
+import com.lm.data.CMSReader;
 import com.lm.data.MetaCMSReader;
 import com.lm.domain.Cell;
 import com.lm.domain.CellSet;
-import com.lm.domain.Job;
 import com.lm.domain.JobSet;
 import com.lm.domain.Machine;
 import com.lm.domain.MachineSet;
@@ -48,9 +48,9 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException,
 			CloneNotSupportedException {
-		RulePriors();
+//		RulePriors();
 //		bestRule_twt();
-//	    HSGA(TWT);
+	    HSGA(TWT);
 //		FullFactorExperiment(TWT);
 	}
 
@@ -63,7 +63,7 @@ public class Main {
 		 for (int caseNo = 0; caseNo < Constants.TOTAL_PROBLEMS; caseNo++) {
 			Constants.RULESET_DIR = "RulePrioirs/Case1/" + (caseNo + 1);
 			
-			dr = new MetaCMSReader("data/Trans/Case1/" + (caseNo + 1));
+			dr = new MetaCMSReader("data/Trans/IABC/" + (caseNo + 1));
 			MachineSet machineSet = dr.getMachineSet();
 	        JobSet jobSet= dr.getJobSet();
 	        CellSet cellSet=dr.getCellSet();
@@ -74,18 +74,18 @@ public class Main {
 					SimpleScheduler simpleScheduler = new SimpleScheduler(machineSet, jobSet ,cellSet);
 					//set machine rule
 					for(Machine m:machineSet){
-						m.setRule(Constants.mRules[Constants.MachineRuleIndex]);
-//						m.setRule(new MachineGP1());
+//						m.setRule(Constants.mRules[Constants.MachineRuleIndex]);
+						m.setRule(new MachineGP1());
 					}
 					//set machine rule
 					for(Cell c:cellSet){
 						c.setRule(Constants.TRules[Constants.TransRuleIndex]);
-//						c.setRule(new TransGP1());
+						c.setRule(new TransGP1());
 					}
 					simpleScheduler.schedule();
 				}
 			}
-	//		System.out.println("程序完成！makespan结果为:"+TWT.toString());	//simpleScheduler.getTotalWeightedTardiness()
+//			System.out.println("程序完成！TWT结果为:"+TWT.toString());	//simpleScheduler.getTotalWeightedTardiness()
 	//		**/
 		 }
 	}
@@ -140,10 +140,10 @@ public class Main {
 	        	stat.value(meanperformance);
 	        	stat.addTime(meanTime);
 	        	stat.setParameter(ga.parameter());
-	        	System.out
-	                .println(ins + "\t" + ga.parameter() + "\t"
-	                        + measure.toString() + "\t" + meanperformance + "\t"
-	                        + meanTime);
+//	        	System.out
+//	                .println(ins + "\t" + ga.parameter() + "\t"
+//	                        + measure.toString() + "\t" + meanperformance + "\t"
+//	                        + meanTime);
 	        }//end for instances
 	   }
 	
@@ -162,7 +162,8 @@ public class Main {
 	        printTitle(resultFileName.toString());
 	        for (int caseNo = 0; caseNo < Constants.TOTAL_PROBLEMS; caseNo++) {
 	        	 System.out.println("case"+(caseNo+1)+":");
-	            dr = new MetaCMSReader("data/Trans/Case1/" + (caseNo + 1));
+	        	Constants.RULESET_DIR = "RulePrioirs/IABC/" + (caseNo + 1);
+	            dr = new MetaCMSReader("data/Trans/IABC/" + (caseNo + 1));
 		       	MachineSet machineSet = dr.getMachineSet();
 		        JobSet jobSet= dr.getJobSet();
 		        CellSet cellSet=dr.getCellSet();

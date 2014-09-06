@@ -113,8 +113,8 @@ public class SimpleScheduler extends AbstractScheduler {
     	 Operation nextScheduleOperation = job.getNextScheduleOperation();
          // 工件仍有下一道工序
          if (nextScheduleOperation != null) {
-            // TODO 加入对跨单元转移的考虑
             /**看是否需要跨出单元，是否不需要直接指派，不然放置到单元的BUFFER上面**/
+//        	 System.out.println(job.getName()+":"+job.getOperation(job.getNextScheduleNo()-1-1).getName());
         	Cell c=cellSet.get(job.getLastMachine().getCellID()-1);
         	int ChooseResult=c.CanGoWhichCell(nextScheduleOperation);
         	boolean ShouldChangeCell=false;
@@ -166,7 +166,7 @@ public class SimpleScheduler extends AbstractScheduler {
     private void unload(Machine machine) {
         Entity processingEntity = machine.getProcessingEntity();
         if (processingEntity != null) {
-        	//log.info(machine.toString()+"卸载工件:"+processingEntity.getOperations().get(0).toString());
+//        	System.out.println(machine.toString()+"卸载工件:"+processingEntity.getOperations().get(0).toString());
             processingEntity.scheduleOperations();
             assignOperationToMachine(processingEntity);
             machine.setProcessingEntity(null);
@@ -214,7 +214,50 @@ public class SimpleScheduler extends AbstractScheduler {
     		if(!c.getVehicle().getIdle()&&c.getVehicle().IsTimeEqual(Timer.currentTime())){
     			c.getVehicle().changeIdle();
     		}
+//			/**--针对多个目的单元的版本
+    		if(c.getVehicle().getIdle() && c.getBufferSize()!=0)//当前有小车可以运输
+    		{
+    			c.getVehicle().changeIdle();        		//set小车状态
+    			
+    			int CurID=c.getID();						//当前的单元ID
+    			int NextID;									//去往的单元ID
+//    			int NextTime;								//小车下一次回来的时间
+    			int ArrivalTime=Timer.currentTime();		//小车到达每个单元的时间
+    			
+    			//get routes for vehicles
+    			String result = c.SelectTransBatchForMultiple(CellToPartsFunc).toString();
+    			String[] seq  = result.split(";");
+//    			System.out.println(result);
+    			
+    			for(String cur:seq){
+    				int m = cur.indexOf(":");
+    				if(cur.substring(m).length()<3) continue;
+                                                     //工件号
+    				int l = cur.indexOf(":");
+    				String t = cur.substring(0, l);
+    				NextID = Integer.parseInt(t);
+//    				NextID = cur.charAt(0)-'0';
+        			ArrivalTime+=Constants.transferTime[CurID][NextID];	//小车到达目标地点的时间节点
+           			Timer.addTrigger(ArrivalTime);
 
+           			//从信息中分解出所有的加工工序
+           			int i = cur.indexOf(":");
+           			String[] Ops = cur.substring(i+1).split(",");       //.split 起到分割每个工序信息的作用 
+           			if(Ops.length!=0){
+           				for(String Op:Ops){
+           					//设置当前op要加工工件的信息
+           					SetMessageForOpInBatch(Op,NextID,ArrivalTime);
+           				}
+           				CurID = NextID;	//修改下一次的CurID信息
+           			}
+    			}
+    			//设置小车回到单元的时间
+    			ArrivalTime+=Constants.transferTime[CurID][c.getID()];
+    			c.getVehicle().SetBackTime(ArrivalTime);
+    			Timer.addTrigger(ArrivalTime);
+    		}//end if
+//			**/
+    		/** -- 针对只有一个目的单元的版本
     		if(c.getVehicle().getIdle() && c.getBufferSize()!=0)//当前有小车可以运输
     		{
     			//assign batch~~根据批中第一个工件去向，得到下一个要去的单元
@@ -222,19 +265,19 @@ public class SimpleScheduler extends AbstractScheduler {
     			
         		//set小车状态
     			c.getVehicle().changeIdle();
-    			/**当前的单元ID**/
+    			//当前的单元ID
     			int current=c.getID();
-    			/**去往的单元ID**/
+    			//去往的单元ID
     			int next=Constants.CellForm.get(result.get(0).GetNextMachineID());
-    			/**小车到达目标地点的时间节点**/
+    			//小车到达目标地点的时间节点
     			int ArrivalTime=Timer.currentTime()+Constants.transferTime[current][next];
-    			/**小车下一次回来的时间**/
+    			//小车下一次回来的时间
     			int NextTime=ArrivalTime+Constants.transferTime[next][current];
     			c.getVehicle().SetBackTime(NextTime);
     			Timer.addTrigger(ArrivalTime);
     			Timer.addTrigger(NextTime);
     			
-    			/**修改各队列状态**/
+    			//修改各队列状态
     			for (int i = 0; i < result.size(); i++) {
     				//设置工件的到达时间
     				result.get(i).setArrivalTime(ArrivalTime);
@@ -243,10 +286,40 @@ public class SimpleScheduler extends AbstractScheduler {
 					machineSet.get(result.get(i).GetNextMachineID()-1).addOperationToBuffer(result.get(i));
 				}//end for
     		}//end if
-    	}
-    	
+    		**/
+    	}//end scan
     }
-     
+    
+    /**
+     * @Description 为当前Operation设置 NextMachineId,ArrivalTime
+     * @param op
+     */
+    private void SetMessageForOpInBatch(String op,int NextCellId, int ArrivalTime){
+                     //工件号
+		int t = op.indexOf("-");
+		String y = op.substring(0, t);
+//		int jobId = (int)op.charAt(0)-48; 
+		int jobId = Integer.parseInt(y);                                                       //工件号
+		int opId  = Integer.parseInt(op.substring(t+1));       //该工件的工序号
+    	
+		//根据下一个单元，确定一个工件下一个要加工的机器
+		Operation CurOp =  jobSet.get(jobId-1).getOperation(opId-1);
+//		Operation CurOp =  jobSet.get(jobId).getOperation(opId);
+		List<Machine>  MachineList=CurOp.getProcessMachineList();
+		
+		for (int  j = 0; j < MachineList.size(); j++) {
+			if(Constants.CellForm.get( MachineList.get(j).getId() )==NextCellId){
+//				System.out.println("设置"+CurOp.toString()+"加工的机器为"+MachineList.get(j).getId());
+				CurOp.SetNextMachineID(MachineList.get(j).getId()); //找到对应单元上加工的机器
+				jobSet.get(jobId-1).setNextMachineID(MachineList.get(j).getId());
+				CurOp.setArrivalTime(ArrivalTime);					//设置工件的到达时间
+				machineSet.get(CurOp.GetNextMachineID()-1)
+								.addOperationToBuffer(CurOp);		//将各Job工序加入到各个机器加工的缓冲队列中
+				break;
+			}
+		}
+	}
+    
     /** 
      * @Description 扫描工件是否有作业新到达
      *  
@@ -294,14 +367,12 @@ public class SimpleScheduler extends AbstractScheduler {
         while (!jobSet.isScheduleAll()
                 || !machineSet.isIdleAll(Timer.currentTime())
         	   ) {
-//        	/**
+        	/**
         	Utils.echo("当前时间"+Timer.currentTime());
-        	
-        	Utils.echo("当前Cell0小车状态"+cellSet.get(0).getVehicle().getIdle());
-//        	if(Timer.currentTime()==453){
-//        		Utils.echo("当前断点");
-//        	}
-//        	**/
+        	if(Timer.currentTime()==63){
+        		Utils.echo("当前断点");
+        	}
+        	**/
             if (!unArriJobs.isEmpty()) {
                 scanJobs();
             }
@@ -309,7 +380,6 @@ public class SimpleScheduler extends AbstractScheduler {
             scanCell();
             Timer.stepTimer();
 //          log.info("当前时间"+Timer.currentTime());
-        	Utils.echo("当前Cell0小车状态"+cellSet.get(0).getVehicle().getIdle());
             PrintInfo();
 
         }
