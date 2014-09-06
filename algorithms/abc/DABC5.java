@@ -66,7 +66,7 @@ public class DABC5 {
 	/**factor for x(r1) - x(2^)**/
 	protected final double MutateFactor2 = 0.5;
 	
-	protected final double threshold = 1.05; 
+	protected final double threshold = 1.03; 
 	//the input data for inter-cell problems
 	/**the machine's set **/
 	protected MachineSet mSet;
@@ -306,7 +306,7 @@ public void schedule(int caseIndex) throws CloneNotSupportedException {
 				bestFunction  = evaluation(bestChromosome);
 		}
 //		System.out.println("该种群中最优秀的调度解：");
-		System.out.println("最优解的函数值:"+bestFunction);
+//		System.out.println("最优解的函数值:"+bestFunction);
 		return bestChromosome;
 	}
 	
@@ -684,7 +684,7 @@ public void schedule(int caseIndex) throws CloneNotSupportedException {
 	    	}
 	    	
 	    	if(r1[i]/r2[i]==1){
-	    		if(m[i]>10&&m[i]<=15){              //组别2的搜索
+	    		if(m[i]>10&&m[i]<=5){              //组别2的搜索
 	    			Random rand = new Random();
 	    			int k = rand.nextInt(2);
 	    			if(k==0){
@@ -723,7 +723,7 @@ public void schedule(int caseIndex) throws CloneNotSupportedException {
 	    					
 	    			}
 	    		}
-	    		if(m[i]>15&&m[i]<=20){        //组别3的搜索
+	    		if(m[i]>50&&m[i]<=100){        //组别3的搜索
 	    			Random rand = new Random();
 	    			int k = rand.nextInt(2);
 	    			if(k==0){
@@ -789,7 +789,7 @@ public void schedule(int caseIndex) throws CloneNotSupportedException {
 	    				m[i]++;
 	    			}
 	    		}
-	    		if(m[i]>20){			   //组别1的搜索
+	    		if(m[i]>100){			   //组别1的搜索
 	    			Random rand = new Random();
 	    			int k = rand.nextInt(2);
 	    			if(k==0){

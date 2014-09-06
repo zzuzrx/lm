@@ -2,6 +2,7 @@ package com.lm.algorithms.abc;
 
 
 import java.lang.Math;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,8 +18,8 @@ import com.lm.Metadomain.MachineSet;
 import com.lm.statistic.RuleFrequencyStatistic;
 import com.lm.util.Constants;
 import com.lm.util.Timer;
-import java.lang.StringBuffer;
 
+import java.lang.StringBuffer;
 import java.util.Arrays;
 
 /*
@@ -54,7 +55,7 @@ public class DABC2 {
 	/**the population's size. default=48**/
 	protected int POPULATION_SIZE=48;                       //修改量POPULATION_SIZE
 	/**the maxmum of iteration. default=100**/
-	protected final int MaxCycle=500;                              //修改量MaxCycle
+	protected final int MaxCycle=100;                              //修改量MaxCycle
 	//the input data for inter-cell problems
 	/**the machine's set **/
 	protected MachineSet mSet;
@@ -134,17 +135,29 @@ public class DABC2 {
 		init_population();
 		updateBestChromosome();                       //保存种群中最好的那个调度解
 		
+		int[] NL =new int[200]; 						//NLlist和NLlast初始化，1代表swap，2代表insert，3代表two-swap，4代表two-insert
+		int[] NLL =new int[200];
+		for(int i=0;i<200;i++){
+			int num = ((int)(Math.random()*4)+1) ;
+			NL[i] = num;
+			NLL[i] = num;
+		}
+		
+		ArrayList WNL = new ArrayList();               //WNLlist初始化
 		
 		
 		for (iter=0;iter<MaxCycle;iter++){                               //迭代数
-			EmployedBees();
+//			EmployedBees();
+			EmployedBees(NL,NLL,WNL);
 		    OnlookerBees();
 		    updateBestChromosome();
 		    ScoutBees();
-			if(iter==499){
+
+			if(iter==99){
 //			    System.out.println("该种群中最优秀的调度解：");
 				System.out.println(bestFunction);
 			}
+		
 		}
 	}
 
@@ -355,14 +368,37 @@ public class DABC2 {
 		}
 	
 
-	void EmployedBees() throws CloneNotSupportedException
+//	void EmployedBees() throws CloneNotSupportedException
+//	{
+//		
+//		/**Employed Bee Phase：
+//	   * 对每个解用localsearch1得到neighbour，neighbour要与之前保证不同
+//	   * 用评估函数比较source和neighbour的优劣，取优秀者赋给neighbour
+//	   */
+//
+////		    LocalSearch3();
+////		    LocalSearch1();
+//		    PanSelfAdaptive();
+//		  
+//
+//		    
+//		    
+//	        /*end of employed bee phase*/
+//    }
+	
+	void EmployedBees(int[] nl,int[] nll,ArrayList<Integer> wnl) throws CloneNotSupportedException
 	{
 		
 		/**Employed Bee Phase：
 	   * 对每个解用localsearch1得到neighbour，neighbour要与之前保证不同
 	   * 用评估函数比较source和neighbour的优劣，取优秀者赋给neighbour
 	   */
-		    LocalSearch1();
+
+//		    LocalSearch3();
+//		    LocalSearch1();
+		    PanSelfAdaptive(nl,nll,wnl);
+		  
+
 		    
 		    
 	        /*end of employed bee phase*/
@@ -378,6 +414,7 @@ public class DABC2 {
 	   * 比较对应neighbour和neighbour2，取优秀的赋给neighbour2
 	   */
         LocalSearch2();
+
 	  
 	  
 	   /*end of onlooker bee phase   */
@@ -480,8 +517,8 @@ public class DABC2 {
 	    	chromosome=Population.get(i);
 	    	chromosome.setFunction(evaluation(chromosome));
 //	    	func_value = 40;
-	    	neighbor1.MachineSegment = swap(chromosome.clone().getMachineSegment(),neighbor1.MachineSegment);
-			neighbor1.VehicleSegment =  swap(chromosome.clone().getVehicleSegment(),neighbor1.VehicleSegment);
+	    	neighbor1.MachineSegment = swap1(chromosome.clone().getMachineSegment(),neighbor1.MachineSegment);
+			neighbor1.VehicleSegment =  swap1(chromosome.clone().getVehicleSegment(),neighbor1.VehicleSegment);
 			neighbor1.IntercellPartSequences = swap(chromosome.clone().getPartSequence(),neighbor1.IntercellPartSequences);                   //swap的error是由于intersequence的类型引起的
 		
 			neighbor1.setFunction(evaluation(neighbor1));
@@ -523,7 +560,52 @@ public class DABC2 {
 //		    System.out.println("初始种群中第"+(i+1)+"个调度解经过ls2后的函数值："+chromosome.getFunction());
 	    }
     }
+	private void LocalSearch3() throws CloneNotSupportedException {
 
+	    int i;
+//	    int a=6;
+//	    int b=3;
+	    Chromosome chromosome =new Chromosome(mSet.size(), cellSet.size());
+	    Chromosome neighbor1 = new Chromosome(mSet.size(), cellSet.size()) ;
+//	    Chromosome neighbor1 = new Chromosome(a, b) ;        //a是mSet.size(),  b是cellSet.size();
+ 
+	    for(i=0;i<POPULATION_SIZE;i++) {
+	       
+	    	chromosome=Population.get(i);
+	    	chromosome.setFunction(evaluation(chromosome));
+//	    	func_value = 40;
+	    	neighbor1.MachineSegment = swap2(chromosome.clone().getMachineSegment(),neighbor1.MachineSegment);
+			neighbor1.VehicleSegment =  swap2(chromosome.clone().getVehicleSegment(),neighbor1.VehicleSegment);
+			neighbor1.IntercellPartSequences = swap(chromosome.clone().getPartSequence(),neighbor1.IntercellPartSequences);                   //swap的error是由于intersequence的类型引起的
+		
+			neighbor1.setFunction(evaluation(neighbor1));
+//	    	neighbor_func = 50;
+		    if(neighbor1.getFunction()<=chromosome.getFunction()){
+			    chromosome=neighbor1;
+		    }
+		    Population.set(i,chromosome.clone());
+//		    System.out.println("初始种群中第"+(i+1)+"个调度解经过ls1后的函数值："+chromosome.getFunction());
+	    }
+    }
+
+    /**
+     * @throws CloneNotSupportedException 
+     * @Description localsearch1 for ： 采用
+     */
+
+
+	
+	
+	
+	private void PanSelfAdaptive(int[] nl,int[] nll,ArrayList<Integer> w) throws CloneNotSupportedException {
+		
+
+		 for(int i=0;i<POPULATION_SIZE;i++) {
+			 AdaptiveLS(nl,nll,w, Population.get(i));
+		 }
+		
+		
+	}
 
 
 //	private String[][] swap (String[][] Sequences){
@@ -557,6 +639,98 @@ public class DABC2 {
 //		}
 //		return Sequences;
 //	}
+	
+	
+	 private void AdaptiveLS(int[] nl,int[] nll,ArrayList<Integer> wnl,Chromosome cur) throws CloneNotSupportedException {
+		 int check=0;
+		 for(int i=0;i<200;i++){
+			 if(nl[i]!=0){
+				 check=1;
+			 }
+		 }
+		 if(check==0){
+			 refill(nl,nll,wnl);
+		 }
+		 
+		 for(int i=0;i<200;i++){
+			 if(nl[i]==0){
+				 
+			 }else{
+				 if(nl[i]==1){
+					 swap(nl[i],wnl,cur);
+					 nl[i]=0;
+				 }else if(nl[i]==2){
+					 insert(nl[i],wnl,cur);
+					 nl[i]=0;
+				 }else if(nl[i]==3){
+					 swap(nl[i],wnl,cur);
+					 swap(nl[i],wnl,cur);
+					 nl[i]=0;
+				 }else if(nl[i]==4){
+					 insert(nl[i],wnl,cur);
+					 insert(nl[i],wnl,cur);
+					 nl[i]=0;
+				 }
+				return; 
+			 }
+		 }
+	 }
+	
+	 private void refill(int[] nl,int[] nll,ArrayList<Integer> wnl) throws CloneNotSupportedException {
+		 if(wnl.size()==0){
+			 for(int i=0;i<200;i++){
+				 nl[i] = nll[i];
+ 			 }
+		 }else{
+			 for(int i=0;i<200;i++){
+				 if(Math.random()<0.75){
+					 nl[i] = wnl.get((int)Math.random()*wnl.size());
+ 
+				 }else{
+					 nl[i] = (int) ( Math.random () * 4 )+1;
+				 }
+			 }
+		 }
+		 
+		 for(int i=0;i<200;i++){
+			 nll[i]=nl[i];
+		 }
+	 }
+	 
+	 private void insert(int n,ArrayList<Integer> w,Chromosome cur) throws CloneNotSupportedException{                    //针对一个解的isnert
+	    	Chromosome neighbor = new Chromosome(mSet.size(), cellSet.size()) ;
+	    	neighbor.MachineSegment = insert(cur.clone().getMachineSegment(),neighbor.MachineSegment);
+			neighbor.VehicleSegment = insert(cur.clone().getVehicleSegment(),neighbor.VehicleSegment);
+			neighbor.IntercellPartSequences = insert(cur.clone().getPartSequence(), neighbor.IntercellPartSequences);            
+			double tmp = evaluation(neighbor);
+			
+			if( tmp <= cur.getFunction()){
+				cur.MachineSegment = neighbor.clone().getMachineSegment();
+				cur.VehicleSegment = neighbor.clone().getVehicleSegment();
+				cur.IntercellPartSequences = neighbor.clone().getPartSequence();
+				cur.setFunction(tmp);
+				cur.clearCount();
+				w.add(n);
+			}
+			return ;
+	    }
+	    
+	    private void swap(int n,ArrayList<Integer> w,Chromosome cur) throws CloneNotSupportedException{                     //针对一个解的swap
+	    	Chromosome neighbor = new Chromosome(mSet.size(), cellSet.size()) ;
+	    	neighbor.MachineSegment = swap1(cur.clone().getMachineSegment(),neighbor.MachineSegment);
+			neighbor.VehicleSegment = swap1(cur.clone().getVehicleSegment(),neighbor.VehicleSegment);
+			neighbor.IntercellPartSequences = swap(cur.clone().getPartSequence(), neighbor.IntercellPartSequences);
+			double tmp = evaluation(neighbor);
+			if( tmp <= cur.getFunction()){
+				cur.MachineSegment = neighbor.clone().getMachineSegment();
+				cur.VehicleSegment = neighbor.clone().getVehicleSegment();
+				cur.IntercellPartSequences = neighbor.clone().getPartSequence();
+				cur.setFunction(tmp);
+				cur.clearCount();
+				w.add(n);
+			}
+			return;
+	    }
 
 	private ArrayList<Integer>[][] swap (ArrayList<Integer>[][] Sequences,ArrayList<Integer>[][] Sequences2){
 
@@ -609,7 +783,8 @@ public class DABC2 {
     	
 	}
 	
-    private  int[][] swap ( int[][] segment ,int[][] segment2)
+
+    private  int[][] swap1 ( int[][] segment ,int[][] segment2)             //两个位置都随机的swap
     {
 
     	for(int i =0;i<segment.length;i++){
@@ -620,7 +795,7 @@ public class DABC2 {
     	}
     	for (int index = 0; index < segment2.length; index++) {
     		if(segment2[index].length!=0){
-//    		if(segment[index]!=null){
+    		if(segment[index]!=null){
     				if(segment2[index].length!=2){
     					int[] randoms = getRandomIndex (segment2[index].length);
     		
@@ -629,11 +804,47 @@ public class DABC2 {
     					segment2[index][randoms[1]] = temp;
     		
     				}
-    		}		
+    		}
+    		}
     	}
     		
     	return segment2;
     }
+	
+	   private  int[][] swap2 ( int[][] segment ,int[][] segment2)                    //一个位置随机固定向后冒泡交换
+	    {
+
+	    	for(int i =0;i<segment.length;i++){
+	    	    segment2[i] =new int[segment[i].length];
+	    		for(int j=0;j<segment[i].length;j++){
+	    			segment2[i][j] =segment[i][j];
+	    		}
+	    	}
+	    	for (int index = 0; index < segment2.length; index++) {
+	    		if(segment2[index].length!=0){
+	    		if(segment[index]!=null){
+	    				if(segment2[index].length!=2&&segment2[index].length<5){
+	    					int[] randoms = getRandomIndex (segment2[index].length);
+	    		
+	    					int temp = segment2[index][randoms[0]];
+	    					segment2[index][randoms[0]] = segment2[index][randoms[1]];
+	    					segment2[index][randoms[1]] = temp;
+	    		
+	    				}else if(segment2[index].length>5){
+	    					int[] randoms = getRandomIndex (segment2[index].length-3);
+	    					int temp1 = segment2[index][randoms[0]];
+	    					int temp2 = segment2[index][randoms[0]+2];
+	    					segment2[index][randoms[0]] = segment2[index][randoms[0]+1];
+	    					segment2[index][randoms[0]+1] = temp1;
+	    					segment2[index][randoms[0]+2] = segment2[index][randoms[0]+3];
+	    					segment2[index][randoms[0]+3] = temp2;
+	    				}
+	    		}
+	    		}		
+	    	}
+	    		
+	    	return segment2;
+	    }
     
 	
     private ArrayList<Integer>[][] insert ( ArrayList<Integer>[][] Sequences ,ArrayList<Integer>[][] Sequences2)
@@ -705,7 +916,56 @@ public class DABC2 {
   
 	
 	
-	private int[][] insert ( int[][] chromosome ,int[][] chromosome2)
+//	private int[][] insert ( int[][] chromosome ,int[][] chromosome2)
+//    {
+//
+//	    	for(int i =0;i<chromosome.length;i++){
+//	    		chromosome2[i] =new int[chromosome[i].length];
+//	    		for(int j=0;j<chromosome[i].length;j++){
+//	    			chromosome2[i][j] =chromosome[i][j];
+//	    		}
+//	    	}
+//        
+//        for ( int index = 0; index < chromosome2.length; index++ )
+//        {
+//        	   
+//        	if(chromosome2[index].length!=0){
+////        	if(chromosome[index]!=null){
+//        		if(chromosome2[index].length!=2){
+//        			int[] randoms = getRandomIndex (chromosome2[index].length);         //获取chromosome的优先级序列的长度
+//        			if (randoms[0] < randoms[1]){
+//            	
+//            		
+//            			int temp=chromosome2[index][randoms[0]];
+//            			for ( int i = randoms[0]; i < randoms[1]; i++ ){
+//                	
+//           					chromosome2[index][i] = chromosome2[index][i + 1];
+//           				}
+//           				chromosome2[index][randoms[1]] = temp;
+//            		
+//            	
+//        			}	
+//        			else
+//        			{
+//            	
+//            	    
+//            	
+//            	    	int temp=chromosome2[index][randoms[1]];
+//            	    	for ( int i = randoms[1]; i < randoms[0]; i++ )
+//            	    	{
+//            	    		chromosome2[index][i] = chromosome2[index][i +1];
+//            	    	}
+//            	    	chromosome2[index][randoms[0]] = temp;
+//            	   
+//            	           
+//        			}
+//        		}
+//        	}
+//        }
+//        
+//        return chromosome2;
+//    }
+    private int[][] insert ( int[][] chromosome ,int[][] chromosome2)
     {
 
 	    	for(int i =0;i<chromosome.length;i++){
