@@ -80,6 +80,14 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
     public double getFunction() {
 		return functions[2];
 	}
+    
+    public double getFunction1() {
+		return functions[1];
+	}
+    
+    public double getFunction0() {
+		return functions[0];
+	}
 
 	/**
 	 * @Description update function values of Chromosomes for current
@@ -94,6 +102,17 @@ public class Chromosome implements Comparable<Chromosome>, Cloneable {
 		//更新本次
 		functions[2] = function;
 	}
+	
+	public void setFunction0(double function) {                    //用于更新第一次的值
+
+		functions[0] = function;
+	}
+	
+	public void setFunction1(double function) {                    //用于更新第一次的值
+
+		functions[1] = function;
+	}
+	
     /* (non-Javadoc):clone methods to copy a get function values of Chromosomes
      * @see java.lang.Object#clone()
      * override
