@@ -142,12 +142,4 @@ public class Buffer implements Iterable<Operation>{
     public Iterator<Operation> iterator() {
         return operations.iterator();
     }
-
-    /**
-     * @Description clear the operations
-     * 清空缓冲区内容
-     */
-    public void operationClear() {
-	operations.clear();
-    }
 }
