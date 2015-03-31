@@ -8,12 +8,12 @@ import java.util.List;
 
  * @author:lm
 
- * @time:2013-11-6 下午06:04:05
+ * @time:2015-03-31 上午11:13:45
 
  */
 public class Buffer implements Iterable<Operation>{
 /***************************属性域***********************************************************************/
-	/** 缓冲区工序集合 **/
+    /** 缓冲区工序集合 **/
     private List<Operation> operations;
     /** BUFFER所属的机器 **/
     public Machine machine;
@@ -25,9 +25,8 @@ public class Buffer implements Iterable<Operation>{
      * @exception:
      */
     public Buffer() {
-		// TODO Auto-generated constructor stub
     	operations = new ArrayList<Operation>();
-	}
+    }
 
     /**
      * @Description construction of Buffer with params
@@ -44,19 +43,19 @@ public class Buffer implements Iterable<Operation>{
      * @return
      */
     public List<Operation> getOperations() {
-		return operations;
-	}
-
-	/**
-	 * @Description set the current job operations in buffer
-	 * @param operations
-	 */
-	public void setOperations(List<Operation> operations) {
-		this.operations = operations;
-	}
+	return operations;
+    }
 
     /**
-     * @Description 往缓冲区添加工序 
+     * @Description set the current job operations in buffer
+     * @param operations
+     */
+    public void setOperations(List<Operation> operations) {
+	this.operations = operations;
+    }
+
+    /**
+     * @Description Add operations to the buffer
      * @param oper
      */
     public void addOperation(Operation oper) {
@@ -64,14 +63,15 @@ public class Buffer implements Iterable<Operation>{
     }
 
     /**
-     * @Description  清空缓冲区
+     * @Description  clear the buffer 
      */
     public void clear() {
         operations.clear();
     }
 
     /**
-     * @Description 获取缓冲区第index个工序
+     * @Description get the index-th operation in buffer
+     * 获取缓冲区第index个工序
      * @param index
      * @return
      */
@@ -83,7 +83,8 @@ public class Buffer implements Iterable<Operation>{
     }
 
     /**
-     * @Description 判断缓冲区是否为空
+     * @Description determine whether the buffer is empty or not
+     * 判断缓冲区是否为空
      * @return
      */
     public boolean isEmpty() {
@@ -91,8 +92,9 @@ public class Buffer implements Iterable<Operation>{
     }
 
     /**
-     * @Description 从缓冲区删除实体
-     * @param entity
+     * @Description delete the corresponding entity from buffer
+     * 从缓冲区删除相关实体
+     * @param entity 
      */
     public void removeOperation(Entity entity) {
         for (Operation operation : entity.getOperations()) {
@@ -101,7 +103,8 @@ public class Buffer implements Iterable<Operation>{
     }
 
     /**
-     * @Description 从缓冲区删除工序 
+     * @Description  delete the corresponding operation from buffer 
+     * 从缓冲区删除工序 
      * @param opera
      */
     public void removeOperation(Operation opera) {
@@ -109,7 +112,8 @@ public class Buffer implements Iterable<Operation>{
     }
 
     /**
-     * @Description 获取缓冲区工序数量
+     * @Description get the size of buffer
+     * 获取缓冲区工序数量
      * @return
      */
     public int size() {
@@ -117,7 +121,8 @@ public class Buffer implements Iterable<Operation>{
     }
 
     /**
-     * @Description 获取已达工序集合
+     * @Description get the operations that has arrived in the buffer
+     * 获取已达工序集合
      * @return
      */
     public List<Operation> getArrivedOperations() {
@@ -138,12 +143,11 @@ public class Buffer implements Iterable<Operation>{
         return operations.iterator();
     }
 
-	/**
-	 * @Description 清空缓冲区内容
-	 */
-	public void operationClear() {
-		// TODO Auto-generated method stub
-		operations.clear();
-	}
-
+    /**
+     * @Description clear the operations
+     * 清空缓冲区内容
+     */
+    public void operationClear() {
+	operations.clear();
+    }
 }
