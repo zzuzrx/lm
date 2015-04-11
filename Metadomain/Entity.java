@@ -13,12 +13,12 @@ import com.lm.Metadomain.Operation;
 
  * @author:lm
 
- * @time:2013-11-6 下午10:27:47
+ * @time:2015-04-11上午10:10:47
 
  */
 public class Entity implements Iterable<Operation>{
 /***************************属性域***********************************************************************/
-	/** 该实体所含工序 */
+    /** 该实体所含工序 */
     private List<Operation> operations;
     /** 该实体的处理时间 */
     private int processingTime;
@@ -69,7 +69,9 @@ public class Entity implements Iterable<Operation>{
      * @return
      */
     public int getArrivalTime() {
-        if (arrivalTime != -1) { return arrivalTime; }
+        if (arrivalTime != -1) {
+        	return arrivalTime; 
+        }
         int min = Integer.MAX_VALUE;
         for (Operation operation : operations) {
             min = Math.min(min, operation.getArrivalTime());
@@ -83,7 +85,9 @@ public class Entity implements Iterable<Operation>{
      * @return
      */
     public int getDueDate() {
-        if (duedate != -1) { return duedate; }
+        if (duedate != -1) { 
+        	return duedate; 
+        }
         int min = Integer.MAX_VALUE;
         for (Operation operation : operations) {
             min = Math.min(min, operation.getDueDate());
@@ -97,7 +101,9 @@ public class Entity implements Iterable<Operation>{
      * @return
      */
     public int getRelDateTime() {
-        if (relDate != -1) { return relDate; }
+        if (relDate != -1) { 
+        	return relDate; 
+        }
         int min = Integer.MAX_VALUE;
         for (Operation operation : operations) {
             min = Math.min(min, operation.getRelDate());
@@ -111,7 +117,9 @@ public class Entity implements Iterable<Operation>{
      * @return
      */
     public int getRemainingTime() {
-        if (remainingTime != -1) { return remainingTime; }
+        if (remainingTime != -1) { 
+        	return remainingTime; 
+        }
         int max = Integer.MIN_VALUE;
         for (Operation operation : operations) {
             max = Math.max(max, operation.getRemainingTime());
@@ -184,7 +192,7 @@ public class Entity implements Iterable<Operation>{
      * @Description calculate the processing time of entity
      */
     private void calProcessingTime() {
-//        int maxSetupTime = Integer.MIN_VALUE;
+//      int maxSetupTime = Integer.MIN_VALUE;
         int maxProcessTime = Integer.MIN_VALUE;
         for (Operation operation : operations) {
             maxProcessTime = Math.max(maxProcessTime, operation.getProcTimes()
@@ -202,8 +210,8 @@ public class Entity implements Iterable<Operation>{
     private void calWeight(){
     	double maxWeight = Double.MIN_VALUE;
     	for (Operation oper : operations) {
-			maxWeight = Math.max(maxWeight, oper.getJob().getWeight());
-		}
+		maxWeight = Math.max(maxWeight, oper.getJob().getWeight());
+	}
     	this.weight = maxWeight;
     }
 
@@ -231,18 +239,19 @@ public class Entity implements Iterable<Operation>{
         return machine;
     }
 
-	/**
-	 * @Description get the weight
-	 * @return
-	 */
-	public double getWeight() {
-		return weight;
-	}
+    /**
+     * @Description get the weight
+     * @return
+     */
+    public double getWeight() {
+	return weight;
+    }
 
-	@Override
-	public String toString(){
-		return getOperations().get(0).toString();
-	}
+    @Override
+    public String toString(){
+	return getOperations().get(0).toString();
+    }
+    
     public Iterator<Operation> iterator() {
         return operations.iterator();
     }
