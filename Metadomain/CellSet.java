@@ -3,7 +3,6 @@ package com.lm.Metadomain;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import com.lm.Metadomain.Cell;
 
 /**
@@ -11,16 +10,14 @@ import com.lm.Metadomain.Cell;
 
  * @author:lm
 
- * @time:2013-11-6 下午03:53:33
+ * @time:2015-04-11 上午10:57:33
 
  */
 public class CellSet implements Iterable<Cell> {
 /***************************属性域***********************************************************************/
 	/**单元集合**/
 	private List<Cell> cells;
-
 /***************************方法域***********************************************************************/
-
 	/**
 	 * @Description construction of CellSet
 	 * @exception:
@@ -60,8 +57,9 @@ public class CellSet implements Iterable<Cell> {
 	 */
 	public boolean isScheduleAll() {
 		for (Cell c : cells) {
-			if (c.isTransComplete() == false)
+			if (c.isTransComplete() == false) {
 				return false;
+			}
 		}
 		return true;
 	}
